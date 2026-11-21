@@ -56,11 +56,8 @@ In V7, `?walk=inca`, `?walk=torres`, `?walk=kili` or `?walk=everest` loads that 
 - Elevation from [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Mapzen and Tilezen), built on SRTM and, for Tongariro, the LINZ New Zealand elevation model (CC BY 4.0).
 - The guides' portraits are AI-generated. Fold Line and its guides are fictional.
 - Trek facts: every number in `data/treks.md` has its source beside it.
+- The paper pop-up engine in V1 (folds, springs, the paper look) started from Sam's own earlier piece, Paper Theatre.
 
-## Before this repo goes public (remove this section then)
-
-1. **The globe's coastline** (`hero/globe-data.js` in V6 and V7, `tools/make-globe-data.mjs`) is traced from the world map inside macOS. Redo it from Natural Earth (public domain) and update the live page to match.
-2. **The paper engine** in V1 and V7 started from Sam's own Paper Theatre pop-up book piece. Confirm it can be published, then credit it here.
-3. **The guides' portraits:** name the tool that made them in the credits above.
+## Not in this repo
 
 Left out on purpose: the build's notes and recordings, two other concepts, the original pop-up book file, the agents' hand-over briefs, the scoring kit, the Aura loader and the one-file builds, and the portraits' full-size originals.

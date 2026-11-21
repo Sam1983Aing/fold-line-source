@@ -1,0 +1,1188 @@
+[
+  {
+    "id": "01",
+    "name": "Tongariro Alpine Crossing",
+    "country": "New Zealand",
+    "days": 1,
+    "distance_km": 19.4,
+    "start": {
+      "name": "Mangatepōpō road end",
+      "elev_m": 1120
+    },
+    "end": {
+      "name": "Ketetahi road end",
+      "elev_m": 760
+    },
+    "high": {
+      "name": "Red Crater",
+      "elev_m": 1886
+    },
+    "ascent_m": 830,
+    "descent_m": 1196,
+    "nights": [
+      {
+        "day": 1,
+        "name": "No overnight, one-day crossing",
+        "elev_m": null,
+        "type": "none"
+      }
+    ],
+    "beats": [
+      {
+        "key": "climb",
+        "name": "Devil's Staircase",
+        "elev_m": 1650,
+        "day": 1,
+        "line": "From the Soda Springs turn-off the track climbs steps and old lava flows to the rim of South Crater.",
+        "fact": "A climb of around 350 m up a staircase to South Crater (DOC)."
+      },
+      {
+        "key": "night",
+        "name": "South Crater",
+        "elev_m": 1650,
+        "day": 1,
+        "line": "No night on this one. The pause is a flat, silent crater floor between the two climbs, with Ngāuruhoe on your right.",
+        "fact": "South Crater, about 1,650 m: the only flat stretch between the two big climbs (Wikipedia)."
+      },
+      {
+        "key": "top",
+        "name": "Red Crater",
+        "elev_m": 1886,
+        "day": 1,
+        "line": "A rust-red vent on the ridge, with the Emerald Lakes shining in the scree below.",
+        "fact": "Red Crater, 1,886 m, the highest point on the crossing (DOC)."
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "Mangatepōpō road end",
+        "lat": -39.145,
+        "lon": 175.581,
+        "elev_m": 1120,
+        "km": 0.0
+      },
+      {
+        "name": "Soda Springs turn-off",
+        "lat": -39.14,
+        "lon": 175.625,
+        "elev_m": 1370,
+        "km": 4.3
+      },
+      {
+        "name": "South Crater rim, top of the Devil's Staircase",
+        "lat": -39.143,
+        "lon": 175.636,
+        "elev_m": 1670,
+        "km": 6.5
+      },
+      {
+        "name": "South Crater",
+        "lat": -39.142,
+        "lon": 175.641,
+        "elev_m": 1650,
+        "km": 6.9
+      },
+      {
+        "name": "Red Crater",
+        "lat": -39.136,
+        "lon": 175.65,
+        "elev_m": 1886,
+        "km": 8.2
+      },
+      {
+        "name": "Emerald Lakes",
+        "lat": -39.134,
+        "lon": 175.654,
+        "elev_m": 1695,
+        "km": 8.6
+      },
+      {
+        "name": "Blue Lake",
+        "lat": -39.127,
+        "lon": 175.659,
+        "elev_m": 1720,
+        "km": 9.7
+      },
+      {
+        "name": "North Crater flank",
+        "lat": -39.124,
+        "lon": 175.656,
+        "elev_m": 1750,
+        "km": 10.1
+      },
+      {
+        "name": "Ketetahi Shelter",
+        "lat": -39.108,
+        "lon": 175.653,
+        "elev_m": 1450,
+        "km": 13.1
+      },
+      {
+        "name": "Ketetahi road end",
+        "lat": -39.074,
+        "lon": 175.664,
+        "elev_m": 760,
+        "km": 19.4
+      }
+    ],
+    "season": {
+      "best": "November to April, the summer season, when shuttles run and DOC issues a daily 6 am weather advisory (DOC).",
+      "avoid": "May to late October unless guided: winter conditions need crampons, ice axe, helmet and avalanche gear, and shuttles generally do not run (DOC)."
+    },
+    "permits": [
+      "No permit or fee. A free track booking is recommended for everyone and required to use a shuttle or guided walk (DOC).",
+      "In summer there is no visitor parking at the Mangatepōpō car park, so book a shuttle or arrange a drop-off (DOC).",
+      "DOC advises against parking on State Highway shoulders (DOC).",
+      "Drones need a DOC permit. Mountain bikes are not allowed (DOC).",
+      "After the November 2025 fires, a 10-year restorative rāhui (a customary Māori restriction) covers the burnt areas: stay on the track (DOC)."
+    ],
+    "price_usd": {
+      "low": 185,
+      "high": 253
+    },
+    "group": {
+      "min": 1,
+      "max": 15
+    },
+    "facts": [
+      "It is one-way. You finish 19.4 km from where you started, and in summer you cannot park at the start at all, so the shuttle is part of the plan (DOC, Wikipedia).",
+      "The Emerald Lakes look swimmable but are off limits: DOC asks walkers not to touch or enter any lake (DOC).",
+      "DOC has asked tour operators to stop calling Ngāuruhoe 'Mt Doom' (Wikipedia).",
+      "Walker numbers grew from about 10,000 in 1990 to about 125,000 in 2015 (Wikipedia).",
+      "No water on the track is safe to drink. Carry 2 to 3 litres (DOC)."
+    ],
+    "kit": [
+      {
+        "item": "Waterproof, windproof jacket",
+        "why": "Alpine weather changes fast and snow can fall in any month (DOC)."
+      },
+      {
+        "item": "2 to 3 litres of water",
+        "why": "No water on the track is safe to drink (DOC)."
+      },
+      {
+        "item": "Boots with real grip",
+        "why": "Loose scree (small sliding volcanic stones) on the slopes of Red Crater is the main slip hazard (DOC)."
+      },
+      {
+        "item": "Warm layer, hat and gloves",
+        "why": "Hours on exposed ridges above 1,600 m, even on a sunny day."
+      },
+      {
+        "item": "Sunscreen and sunglasses",
+        "why": "There is no shade between the valley and the bush on the far side."
+      },
+      {
+        "item": "Lunch and snacks",
+        "why": "DOC says to allow 9 hours."
+      },
+      {
+        "item": "Shuttle booking",
+        "why": "The track ends 19.4 km from where it starts."
+      },
+      {
+        "item": "Winter only: crampons, ice axe, helmet, avalanche transceiver, probe, shovel",
+        "why": "DOC lists these for May to late October, and you need to know how to use them (DOC)."
+      }
+    ],
+    "estimated_fields": [
+      "ascent_m",
+      "waypoints[1].elev_m",
+      "waypoints[2].elev_m",
+      "waypoints[6].elev_m",
+      "waypoints[7].elev_m",
+      "waypoints[*].km"
+    ]
+  },
+  {
+    "id": "02",
+    "name": "Classic Inca Trail to Machu Picchu",
+    "country": "Peru",
+    "days": 4,
+    "distance_km": 42,
+    "start": {
+      "name": "KM 82, Piscacucho",
+      "elev_m": 2720
+    },
+    "end": {
+      "name": "Machu Picchu",
+      "elev_m": 2430
+    },
+    "high": {
+      "name": "Warmiwañusca (Dead Woman's Pass)",
+      "elev_m": 4215
+    },
+    "ascent_m": 2020,
+    "descent_m": 2376,
+    "nights": [
+      {
+        "day": 1,
+        "name": "Camp near Wayllabamba (some groups use Ayapata)",
+        "elev_m": 3100,
+        "type": "tent"
+      },
+      {
+        "day": 2,
+        "name": "Pacaymayo camp (some groups use Chaquicocha)",
+        "elev_m": 3600,
+        "type": "tent"
+      },
+      {
+        "day": 3,
+        "name": "Wiñay Wayna camp",
+        "elev_m": 2650,
+        "type": "tent"
+      }
+    ],
+    "beats": [
+      {
+        "key": "climb",
+        "name": "Dead Woman's Pass (Abra Warmiwañusca)",
+        "elev_m": 4215,
+        "day": 2,
+        "line": "A morning of stone stairs, more than 1,100 m of climbing from the valley to the highest pass of the trail.",
+        "fact": "4,215 m, the highest point of the trail (Wikipedia, Alpaca Expeditions)."
+      },
+      {
+        "key": "night",
+        "name": "Wiñay Wayna",
+        "elev_m": 2650,
+        "day": 3,
+        "line": "The last camp, beside Inca terraces in the cloud forest, an early night before a pre-dawn start.",
+        "fact": "Wiñay Wayna is Quechua for 'forever young', and the Sun Gate is about 3 km away (Wikipedia)."
+      },
+      {
+        "key": "top",
+        "name": "Inti Punku (Sun Gate)",
+        "elev_m": 2745,
+        "day": 4,
+        "line": "The stone gateway where the trail tops out and Machu Picchu appears below for the first time.",
+        "fact": "From about 2,745 m the citadel lies roughly 300 m below you (Andean Trails, Wikipedia)."
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "KM 82, Piscacucho",
+        "lat": -13.215,
+        "lon": -72.382,
+        "elev_m": 2720,
+        "km": 0.0
+      },
+      {
+        "name": "Wayllabamba (day 1 camp area)",
+        "lat": -13.257,
+        "lon": -72.443,
+        "elev_m": 3100,
+        "km": 13.4
+      },
+      {
+        "name": "Ayapata",
+        "lat": -13.259,
+        "lon": -72.462,
+        "elev_m": 3300,
+        "km": 17.2
+      },
+      {
+        "name": "Llulluchapampa",
+        "lat": -13.251,
+        "lon": -72.472,
+        "elev_m": 3800,
+        "km": 19.1
+      },
+      {
+        "name": "Dead Woman's Pass (Warmiwañusca)",
+        "lat": -13.243,
+        "lon": -72.484,
+        "elev_m": 4215,
+        "km": 21.1
+      },
+      {
+        "name": "Pacaymayo camp",
+        "lat": -13.234,
+        "lon": -72.498,
+        "elev_m": 3600,
+        "km": 23.7
+      },
+      {
+        "name": "Runkurakay pass",
+        "lat": -13.227,
+        "lon": -72.505,
+        "elev_m": 3950,
+        "km": 25.3
+      },
+      {
+        "name": "Sayacmarca",
+        "lat": -13.228,
+        "lon": -72.516,
+        "elev_m": 3610,
+        "km": 26.8
+      },
+      {
+        "name": "Chaquicocha camp",
+        "lat": -13.223,
+        "lon": -72.519,
+        "elev_m": 3600,
+        "km": 27.8
+      },
+      {
+        "name": "Phuyupatamarca",
+        "lat": -13.207,
+        "lon": -72.53,
+        "elev_m": 3600,
+        "km": 31.1
+      },
+      {
+        "name": "Wiñay Wayna",
+        "lat": -13.19,
+        "lon": -72.537,
+        "elev_m": 2650,
+        "km": 36.3
+      },
+      {
+        "name": "Inti Punku (Sun Gate)",
+        "lat": -13.17,
+        "lon": -72.534,
+        "elev_m": 2745,
+        "km": 40.0
+      },
+      {
+        "name": "Machu Picchu",
+        "lat": -13.166,
+        "lon": -72.543,
+        "elev_m": 2430,
+        "km": 42.0
+      }
+    ],
+    "season": {
+      "best": "May to September (dry season). April and October are quieter shoulder months (operators).",
+      "avoid": "February, when the trail is closed for maintenance, and the wettest months, roughly December to March (Andina, operators)."
+    },
+    "permits": [
+      "About 500 permits a day, including guides, cooks and porters, which leaves roughly 200 places for trekkers (Wikipedia).",
+      "No independent hiking: permits are sold only through licensed operators, and a guide is mandatory (Wikipedia, Andina).",
+      "Each permit is tied to one passport and cannot be transferred (Wikipedia).",
+      "The trail closes every February for maintenance (Andina, 2026 season).",
+      "In 2026 the Inca Trail ticket continues into Machu Picchu on Route 3-B, with its own daily quota (Andina)."
+    ],
+    "price_usd": {
+      "low": 835,
+      "high": 1695
+    },
+    "group": {
+      "min": 2,
+      "max": 16
+    },
+    "facts": [
+      "By law a porter may carry at most 20 kg (men) or 15 kg (women), under Ley 31614 of 2022, and loads are weighed on the trail (El Peruano, Responsible Travel).",
+      "Metal-tipped trekking poles are not allowed (Wikipedia).",
+      "Heavy rain on 17 and 18 August 2026 shut Routes 1, 2 and 3 of the Inca trail network. They reopened on 26 August 2026 (Panamericana).",
+      "Machu Picchu (2,430 m) sits almost 1,000 m lower than Cusco (3,399 m), where most trekkers acclimatise first (Wikipedia)."
+    ],
+    "kit": [
+      {
+        "item": "The passport on your permit",
+        "why": "Permits are tied to one passport and checked at the start (Wikipedia)."
+      },
+      {
+        "item": "Rubber-tipped trekking poles",
+        "why": "Metal tips are not allowed on the Inca stones (Wikipedia)."
+      },
+      {
+        "item": "Headlamp",
+        "why": "Day 4 starts in the dark to reach the Sun Gate early."
+      },
+      {
+        "item": "Rain jacket",
+        "why": "Day 3 drops into cloud forest, and rain is possible in any month."
+      },
+      {
+        "item": "Warm sleeping bag",
+        "why": "Camps sit at 3,000 to 3,600 m and nights are cold."
+      },
+      {
+        "item": "Broken-in boots",
+        "why": "Much of the trail is original Inca stone steps."
+      },
+      {
+        "item": "A soft bag within the 7 kg porter allowance",
+        "why": "Alpaca Expeditions' porters carry 7 kg per trekker, including sleeping bag and mat (Alpaca Expeditions)."
+      }
+    ],
+    "estimated_fields": [
+      "waypoints[7].elev_m",
+      "waypoints[*].km"
+    ]
+  },
+  {
+    "id": "03",
+    "name": "W Trek, Torres del Paine",
+    "country": "Chile",
+    "days": 5,
+    "distance_km": 71,
+    "start": {
+      "name": "Paine Grande (catamaran from Pudeto)",
+      "elev_m": 40
+    },
+    "end": {
+      "name": "Welcome Center, Las Torres",
+      "elev_m": 140
+    },
+    "high": {
+      "name": "Mirador Base Torres",
+      "elev_m": 870
+    },
+    "ascent_m": 2350,
+    "descent_m": 2250,
+    "nights": [
+      {
+        "day": 1,
+        "name": "Refugio Grey or Grey campsite (Vértice)",
+        "elev_m": 80,
+        "type": "refugio"
+      },
+      {
+        "day": 2,
+        "name": "Refugio Paine Grande or campsite (Vértice)",
+        "elev_m": 40,
+        "type": "refugio"
+      },
+      {
+        "day": 3,
+        "name": "Francés camp, domes or equipped tents (Las Torres)",
+        "elev_m": 170,
+        "type": "tent"
+      },
+      {
+        "day": 4,
+        "name": "Refugio Chileno or campsite (Las Torres)",
+        "elev_m": 410,
+        "type": "refugio"
+      }
+    ],
+    "beats": [
+      {
+        "key": "climb",
+        "name": "Valle del Francés to Mirador Británico",
+        "elev_m": 760,
+        "day": 3,
+        "line": "Up the French Valley past hanging glaciers into a ring of granite peaks.",
+        "fact": "Rangers stop people starting up to Mirador Británico after 14:00 (CONAF, 2025-26 season)."
+      },
+      {
+        "key": "night",
+        "name": "Refugio Chileno",
+        "elev_m": 410,
+        "day": 4,
+        "line": "A wooden refugio (mountain hut with bunks and meals) in a beech-forest valley, the last bed below the towers.",
+        "fact": "CONAF's Torres campsite, closer to the towers, was closed for 2025-26, so Chileno is the nearest place to sleep (CONAF)."
+      },
+      {
+        "key": "top",
+        "name": "Mirador Base Torres",
+        "elev_m": 870,
+        "day": 5,
+        "line": "A last steep scramble up a boulder moraine ends at a glacial lake under the three granite towers.",
+        "fact": "The towers rise to about 2,500 m, over 1,600 m above the lake (Wikipedia)."
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "Paine Grande",
+        "lat": -51.073,
+        "lon": -73.094,
+        "elev_m": 40,
+        "km": 0.0
+      },
+      {
+        "name": "Refugio Grey",
+        "lat": -51.008,
+        "lon": -73.176,
+        "elev_m": 80,
+        "km": 10.5
+      },
+      {
+        "name": "Paine Grande (return)",
+        "lat": -51.073,
+        "lon": -73.094,
+        "elev_m": 40,
+        "km": 21.0
+      },
+      {
+        "name": "Italiano ranger station",
+        "lat": -51.027,
+        "lon": -73.04,
+        "elev_m": 160,
+        "km": 28.4
+      },
+      {
+        "name": "Mirador Francés",
+        "lat": -51.02,
+        "lon": -73.045,
+        "elev_m": 230,
+        "km": 29.3
+      },
+      {
+        "name": "Mirador Británico",
+        "lat": -50.983,
+        "lon": -73.054,
+        "elev_m": 760,
+        "km": 34.1
+      },
+      {
+        "name": "Italiano (return)",
+        "lat": -51.027,
+        "lon": -73.04,
+        "elev_m": 160,
+        "km": 39.9
+      },
+      {
+        "name": "Francés camp",
+        "lat": -51.026,
+        "lon": -73.027,
+        "elev_m": 170,
+        "km": 41.1
+      },
+      {
+        "name": "Refugio Los Cuernos",
+        "lat": -51.024,
+        "lon": -72.986,
+        "elev_m": 80,
+        "km": 44.6
+      },
+      {
+        "name": "Paso de los Vientos",
+        "lat": -50.963,
+        "lon": -72.903,
+        "elev_m": 460,
+        "km": 55.7
+      },
+      {
+        "name": "Refugio Chileno",
+        "lat": -50.957,
+        "lon": -72.911,
+        "elev_m": 410,
+        "km": 56.7
+      },
+      {
+        "name": "Mirador Base Torres",
+        "lat": -50.943,
+        "lon": -72.95,
+        "elev_m": 870,
+        "km": 61.1
+      },
+      {
+        "name": "Refugio Chileno (return)",
+        "lat": -50.957,
+        "lon": -72.911,
+        "elev_m": 410,
+        "km": 65.5
+      },
+      {
+        "name": "Welcome Center, Las Torres",
+        "lat": -50.965,
+        "lon": -72.864,
+        "elev_m": 140,
+        "km": 71.1
+      }
+    ],
+    "season": {
+      "best": "December to March for the longest, warmest days. Refugios and campsites run from about September to April (Las Torres, CONAF).",
+      "avoid": "May to August. CONAF closed the W in June and July 2026, and most services shut over winter (CONAF via The Clinic, CONAF bulletin)."
+    },
+    "permits": [
+      "Park entry, bought online at pasesparques.cl: CLP 48,500 (about USD 50) for foreign adults staying more than 2 days, CLP 32,400 for a day pass (parquetorresdelpaine.cl, 2026).",
+      "Every night must be booked in advance at a refugio or campsite, or you are not allowed into the mountain area (CONAF bulletin 2025-26).",
+      "Bookings are split between two companies: Chileno, Cuernos, Francés and Central through Las Torres, Paine Grande and Grey through Vértice (CONAF bulletin, Worldly Adventurer).",
+      "Trails have cut-off times, for example last start for Mirador Británico at 14:00 and Paine Grande to Grey at 15:30 (CONAF bulletin 2025-26).",
+      "Camping only in authorised areas, and stoves only in the designated cooking areas (CONAF map)."
+    ],
+    "price_usd": {
+      "low": 1450,
+      "high": 4975
+    },
+    "group": {
+      "min": 4,
+      "max": 12
+    },
+    "facts": [
+      "Wind ranges from a 20 km/h breeze to gusts of up to 110 km/h, and summer is the windiest season (Las Torres).",
+      "Walking after dark is forbidden, partly because of puma risk (CONAF map).",
+      "Any heat source outside the designated areas is illegal under Law 20,653, with fines up to CLP 2,000,000 or up to three years in prison. A fire in 2011 and 2012 burned about 17,600 ha (CONAF map, Wikipedia).",
+      "Swimming is banned in every lake, lagoon and river in the park, and so are drones (CONAF map).",
+      "CONAF's own campsites Torres, Italiano and Paso were closed for 2025-26 (CONAF bulletin)."
+    ],
+    "kit": [
+      {
+        "item": "Hardshell jacket and overtrousers",
+        "why": "Gusts up to 110 km/h and rain that arrives sideways (Las Torres)."
+      },
+      {
+        "item": "Trekking poles",
+        "why": "CONAF suggests them for the boulder climb to Base Torres (CONAF bulletin)."
+      },
+      {
+        "item": "Warm hat, gloves and a fleece",
+        "why": "Temperatures drop fast when the wind picks up, even in summer."
+      },
+      {
+        "item": "Printed bookings and park ticket",
+        "why": "You may have to show every night's reservation at park entry (Worldly Adventurer)."
+      },
+      {
+        "item": "Some Chilean pesos in cash",
+        "why": "The connection bus from Laguna Amarga to the Welcome Center is CLP 4,500 cash (CONAF bulletin)."
+      },
+      {
+        "item": "Pack liner or dry bags",
+        "why": "Rain and spray on the lakeside stretches."
+      },
+      {
+        "item": "Sunglasses and sunscreen",
+        "why": "Long summer days and glare off glaciers and lakes."
+      }
+    ],
+    "estimated_fields": [
+      "start.elev_m",
+      "end.elev_m",
+      "ascent_m",
+      "descent_m",
+      "nights[0].elev_m",
+      "nights[1].elev_m",
+      "nights[2].elev_m",
+      "beats[0].elev_m",
+      "waypoints[*].elev_m except Chileno and Base Torres",
+      "waypoints[*].km"
+    ]
+  },
+  {
+    "id": "04",
+    "name": "Kilimanjaro, Machame Route",
+    "country": "Tanzania",
+    "days": 7,
+    "distance_km": 62,
+    "start": {
+      "name": "Machame Gate",
+      "elev_m": 1800
+    },
+    "end": {
+      "name": "Mweka Gate",
+      "elev_m": 1640
+    },
+    "high": {
+      "name": "Uhuru Peak",
+      "elev_m": 5895
+    },
+    "ascent_m": 5000,
+    "descent_m": 5200,
+    "nights": [
+      {
+        "day": 1,
+        "name": "Machame Camp",
+        "elev_m": 2850,
+        "type": "tent"
+      },
+      {
+        "day": 2,
+        "name": "Shira 2 Camp",
+        "elev_m": 3810,
+        "type": "tent"
+      },
+      {
+        "day": 3,
+        "name": "Barranco Camp",
+        "elev_m": 3976,
+        "type": "tent"
+      },
+      {
+        "day": 4,
+        "name": "Karanga Camp",
+        "elev_m": 3995,
+        "type": "tent"
+      },
+      {
+        "day": 5,
+        "name": "Barafu Camp",
+        "elev_m": 4673,
+        "type": "tent"
+      },
+      {
+        "day": 6,
+        "name": "Mweka Camp",
+        "elev_m": 3068,
+        "type": "tent"
+      }
+    ],
+    "beats": [
+      {
+        "key": "climb",
+        "name": "Barranco Wall",
+        "elev_m": 3976,
+        "day": 4,
+        "line": "Straight out of camp onto a steep rock wall, hands on the rock, porters with loads passing by.",
+        "fact": "A non-technical scramble of nearly 900 ft, about 270 m (Ultimate Kilimanjaro)."
+      },
+      {
+        "key": "night",
+        "name": "Barafu Camp",
+        "elev_m": 4673,
+        "day": 5,
+        "line": "A rocky high camp on a ridge. Early dinner, a few hours of sleep, then boots on in the dark.",
+        "fact": "The summit push starts around midnight (Ultimate Kilimanjaro)."
+      },
+      {
+        "key": "top",
+        "name": "Uhuru Peak",
+        "elev_m": 5895,
+        "day": 6,
+        "line": "The crater-rim summit, reached after 7 to 8 hours of climbing through the night.",
+        "fact": "5,895 m, the highest point in Africa and the highest free-standing mountain in the world (Wikipedia)."
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "Machame Gate",
+        "lat": -3.174,
+        "lon": 37.239,
+        "elev_m": 1800,
+        "km": 0.0
+      },
+      {
+        "name": "Machame Camp",
+        "lat": -3.095,
+        "lon": 37.266,
+        "elev_m": 2850,
+        "km": 11.0
+      },
+      {
+        "name": "Shira 2 Camp",
+        "lat": -3.055,
+        "lon": 37.276,
+        "elev_m": 3810,
+        "km": 16.0
+      },
+      {
+        "name": "Lava Tower",
+        "lat": -3.068,
+        "lon": 37.327,
+        "elev_m": 4630,
+        "km": 23.0
+      },
+      {
+        "name": "Barranco Camp",
+        "lat": -3.095,
+        "lon": 37.33,
+        "elev_m": 3976,
+        "km": 26.0
+      },
+      {
+        "name": "Karanga Camp",
+        "lat": -3.113,
+        "lon": 37.355,
+        "elev_m": 3995,
+        "km": 31.0
+      },
+      {
+        "name": "Barafu Camp",
+        "lat": -3.1,
+        "lon": 37.379,
+        "elev_m": 4673,
+        "km": 35.0
+      },
+      {
+        "name": "Stella Point",
+        "lat": -3.079,
+        "lon": 37.362,
+        "elev_m": 5756,
+        "km": 39.0
+      },
+      {
+        "name": "Uhuru Peak",
+        "lat": -3.076,
+        "lon": 37.354,
+        "elev_m": 5895,
+        "km": 40.0
+      },
+      {
+        "name": "Barafu Camp (descent)",
+        "lat": -3.1,
+        "lon": 37.379,
+        "elev_m": 4673,
+        "km": 44.7
+      },
+      {
+        "name": "Mweka Camp",
+        "lat": -3.157,
+        "lon": 37.367,
+        "elev_m": 3068,
+        "km": 52.0
+      },
+      {
+        "name": "Mweka Gate",
+        "lat": -3.22,
+        "lon": 37.342,
+        "elev_m": 1640,
+        "km": 62.0
+      }
+    ],
+    "season": {
+      "best": "January to early March, and June to October (Duma Explorer).",
+      "avoid": "The rainy months outside those windows, roughly mid-March to May and November."
+    },
+    "permits": [
+      "No independent climbs: you must go with a licensed operator and a park-licensed guide (Altezza Travel).",
+      "Park fees for foreign adults: USD 70 a day conservation fee, USD 50 a night camping, USD 20 rescue fee per trip, plus 18% VAT, rates published for 1 January 2025 to 30 June 2026 (Altezza Travel).",
+      "Children under 10 are kept to lower altitudes: 3,700 m in the 2003 park regulations, 3,100 m according to some operators (TanzLII, Ultimate Kilimanjaro).",
+      "Porter loads are weighed at the park gate before the climb (Kandoo Adventures)."
+    ],
+    "price_usd": {
+      "low": 2657,
+      "high": 4266
+    },
+    "group": {
+      "min": 1,
+      "max": 14
+    },
+    "facts": [
+      "Summit night starts around midnight, and the climb to Uhuru takes 7 to 8 hours (Ultimate Kilimanjaro).",
+      "Porters should carry no more than 20 kg of company load, on top of their own kit (KPAP).",
+      "Park fees make up about half the price of a climb (Altezza Travel).",
+      "The mountain lost about 85% of its ice between 1912 and 2011 (Wikipedia).",
+      "On 29 September 2026 a wildfire closed the Lemosho and Londorosi routes, and climbers were sent to Machame, Marangu and Rongai instead (Bernama, TANAPA)."
+    ],
+    "kit": [
+      {
+        "item": "Down jacket and insulated mitts",
+        "why": "Wind and cold on summit night 'can be extreme' (Ultimate Kilimanjaro)."
+      },
+      {
+        "item": "Headlamp and spare batteries",
+        "why": "The summit push is several hours in darkness (Ultimate Kilimanjaro)."
+      },
+      {
+        "item": "Trekking poles",
+        "why": "The descent from the summit is rocky and hard on the knees (Ultimate Kilimanjaro)."
+      },
+      {
+        "item": "Sleeping bag rated well below freezing",
+        "why": "Barafu Camp sits at 4,673 m."
+      },
+      {
+        "item": "Duffel within the porter limit",
+        "why": "Your main bag, sleeping bag included, is limited to 15 kg (Kandoo Adventures)."
+      },
+      {
+        "item": "Water bottles and purification tablets",
+        "why": "Water is collected from streams and treated at camp."
+      },
+      {
+        "item": "Cash for crew tips",
+        "why": "Altezza recommends USD 250 to 350 per climber (Altezza Travel)."
+      }
+    ],
+    "estimated_fields": [
+      "ascent_m",
+      "descent_m",
+      "waypoints[7].lat",
+      "waypoints[7].lon",
+      "waypoints[7].km",
+      "waypoints[9].km",
+      "season.avoid"
+    ]
+  },
+  {
+    "id": "05",
+    "name": "Everest Base Camp and Kala Patthar",
+    "country": "Nepal",
+    "days": 12,
+    "distance_km": 120,
+    "start": {
+      "name": "Lukla",
+      "elev_m": 2860
+    },
+    "end": {
+      "name": "Lukla",
+      "elev_m": 2860
+    },
+    "high": {
+      "name": "Kala Patthar",
+      "elev_m": 5644
+    },
+    "ascent_m": 6000,
+    "descent_m": 6000,
+    "nights": [
+      {
+        "day": 1,
+        "name": "Phakding",
+        "elev_m": 2610,
+        "type": "teahouse"
+      },
+      {
+        "day": 2,
+        "name": "Namche Bazaar",
+        "elev_m": 3440,
+        "type": "teahouse"
+      },
+      {
+        "day": 3,
+        "name": "Namche Bazaar (acclimatisation day)",
+        "elev_m": 3440,
+        "type": "teahouse"
+      },
+      {
+        "day": 4,
+        "name": "Tengboche",
+        "elev_m": 3867,
+        "type": "teahouse"
+      },
+      {
+        "day": 5,
+        "name": "Dingboche",
+        "elev_m": 4410,
+        "type": "teahouse"
+      },
+      {
+        "day": 6,
+        "name": "Dingboche (acclimatisation day)",
+        "elev_m": 4410,
+        "type": "teahouse"
+      },
+      {
+        "day": 7,
+        "name": "Lobuche",
+        "elev_m": 4940,
+        "type": "teahouse"
+      },
+      {
+        "day": 8,
+        "name": "Gorak Shep",
+        "elev_m": 5164,
+        "type": "teahouse"
+      },
+      {
+        "day": 9,
+        "name": "Pheriche",
+        "elev_m": 4371,
+        "type": "teahouse"
+      },
+      {
+        "day": 10,
+        "name": "Namche Bazaar",
+        "elev_m": 3440,
+        "type": "teahouse"
+      },
+      {
+        "day": 11,
+        "name": "Lukla",
+        "elev_m": 2860,
+        "type": "teahouse"
+      }
+    ],
+    "beats": [
+      {
+        "key": "climb",
+        "name": "Namche Hill",
+        "elev_m": 3440,
+        "day": 2,
+        "line": "Over the high suspension bridges, then a long switchback climb to the horseshoe-shaped town of Namche Bazaar.",
+        "fact": "Monjo to Namche climbs about 660 m in 6.5 km (Stingy Nomads)."
+      },
+      {
+        "key": "night",
+        "name": "Gorak Shep",
+        "elev_m": 5164,
+        "day": 8,
+        "line": "A huddle of teahouses on a frozen, sand-covered lakebed, the highest bed of the trek.",
+        "fact": "Gorak Shep, 5,164 m, was the first Everest base camp, used by the 1952 Swiss expedition (Wikipedia)."
+      },
+      {
+        "key": "top",
+        "name": "Kala Patthar",
+        "elev_m": 5644,
+        "day": 9,
+        "line": "A dawn climb up a dark ridge above Gorak Shep for the closest view of Everest's summit.",
+        "fact": "The most accessible close-up view of Everest, 5,644 m by GPS (5,545 m in many guides) (Wikipedia)."
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "Lukla",
+        "lat": 27.688,
+        "lon": 86.731,
+        "elev_m": 2860,
+        "km": 0.0
+      },
+      {
+        "name": "Phakding",
+        "lat": 27.74,
+        "lon": 86.713,
+        "elev_m": 2610,
+        "km": 8.0
+      },
+      {
+        "name": "Monjo (park entrance)",
+        "lat": 27.771,
+        "lon": 86.723,
+        "elev_m": 2780,
+        "km": 13.0
+      },
+      {
+        "name": "Namche Bazaar",
+        "lat": 27.805,
+        "lon": 86.713,
+        "elev_m": 3440,
+        "km": 19.5
+      },
+      {
+        "name": "Tengboche",
+        "lat": 27.836,
+        "lon": 86.764,
+        "elev_m": 3867,
+        "km": 30.5
+      },
+      {
+        "name": "Pangboche",
+        "lat": 27.858,
+        "lon": 86.794,
+        "elev_m": 3985,
+        "km": 35.1
+      },
+      {
+        "name": "Dingboche",
+        "lat": 27.892,
+        "lon": 86.831,
+        "elev_m": 4410,
+        "km": 41.0
+      },
+      {
+        "name": "Lobuche",
+        "lat": 27.948,
+        "lon": 86.811,
+        "elev_m": 4940,
+        "km": 49.7
+      },
+      {
+        "name": "Gorak Shep",
+        "lat": 27.98,
+        "lon": 86.829,
+        "elev_m": 5164,
+        "km": 54.7
+      },
+      {
+        "name": "Everest Base Camp",
+        "lat": 28.003,
+        "lon": 86.856,
+        "elev_m": 5364,
+        "km": 58.2
+      },
+      {
+        "name": "Gorak Shep (return)",
+        "lat": 27.98,
+        "lon": 86.829,
+        "elev_m": 5164,
+        "km": 61.7
+      },
+      {
+        "name": "Kala Patthar",
+        "lat": 27.996,
+        "lon": 86.828,
+        "elev_m": 5644,
+        "km": 63.7
+      },
+      {
+        "name": "Gorak Shep (return)",
+        "lat": 27.98,
+        "lon": 86.829,
+        "elev_m": 5164,
+        "km": 65.7
+      },
+      {
+        "name": "Pheriche",
+        "lat": 27.894,
+        "lon": 86.82,
+        "elev_m": 4371,
+        "km": 77.7
+      },
+      {
+        "name": "Namche Bazaar (return)",
+        "lat": 27.805,
+        "lon": 86.713,
+        "elev_m": 3440,
+        "km": 98.2
+      },
+      {
+        "name": "Lukla (return)",
+        "lat": 27.688,
+        "lon": 86.731,
+        "elev_m": 2860,
+        "km": 118.2
+      }
+    ],
+    "season": {
+      "best": "March to May, and late September to November (Stingy Nomads, operators).",
+      "avoid": "June to August, the monsoon: rain, leeches, slippery trails and cancelled flights. December to February is quiet but very cold (operators)."
+    },
+    "permits": [
+      "Sagarmatha National Park entry: NPR 3,000 for foreigners (Himalayan Times). Some counters add 13% VAT, making NPR 3,390 (Setopati, via search).",
+      "Khumbu Pasang Lhamu Rural Municipality trek card: NPR 3,000 for most foreigners, NPR 2,000 for SAARC countries and China, issued in Lukla (municipality website, Himal Press).",
+      "TIMS card: the local trek card replaced it in Khumbu, but the national position is disputed, so confirm with a registered agency (Explore Vision Nepal).",
+      "Guides: Nepal made licensed guides mandatory for foreign trekkers in 2023, but the Khumbu municipality said solo trekkers are still allowed in the Everest region. Check the current position (Kathmandu Post, Explore Vision Nepal).",
+      "In peak season Lukla flights leave from Manthali (Ramechhap), not Kathmandu (Ekantipur, October 2026)."
+    ],
+    "price_usd": {
+      "low": 1048,
+      "high": 2695
+    },
+    "group": {
+      "min": 1,
+      "max": 16
+    },
+    "facts": [
+      "Lukla's runway is 527 m long with an 11.7% slope (Wikipedia).",
+      "In good weather up to 60 flights a day shuttle between Manthali and Lukla, but cloud grounds them for days at a time (Rising Nepal, 2024).",
+      "On the Everest Base Camp route, altitude illness can approach 30% at higher elevations even on standard schedules (CDC).",
+      "Nuptse hides Everest's summit from much of the area, which is why Kala Patthar is the classic viewpoint (Wikipedia).",
+      "Tengboche monastery has been destroyed twice, by an earthquake in 1934 and a fire in 1989 (Wikipedia)."
+    ],
+    "kit": [
+      {
+        "item": "Down jacket",
+        "why": "Teahouse rooms are unheated, and Gorak Shep sits at 5,164 m."
+      },
+      {
+        "item": "Sleeping bag rated well below freezing",
+        "why": "Teahouse bedding is thin, and nights above 4,000 m are cold."
+      },
+      {
+        "item": "Refillable bottle and purification",
+        "why": "Khumbu announced a single-use plastic ban from January 2020 (Himalayan Times)."
+      },
+      {
+        "item": "Cash in Nepali rupees",
+        "why": "The trek card is issued over the counter in Lukla (municipality website)."
+      },
+      {
+        "item": "Insurance that covers helicopter rescue above 5,000 m",
+        "why": "The route tops out at about 5,600 m."
+      },
+      {
+        "item": "Trekking poles",
+        "why": "Long stone-stair descents on the way back to Lukla."
+      },
+      {
+        "item": "Buff or face cover",
+        "why": "Dry, dusty, cold air on the trail."
+      },
+      {
+        "item": "Headlamp",
+        "why": "The Kala Patthar climb starts before dawn."
+      }
+    ],
+    "estimated_fields": [
+      "ascent_m",
+      "descent_m",
+      "waypoints[5].km",
+      "waypoints[14].km",
+      "waypoints[15].km"
+    ]
+  }
+]

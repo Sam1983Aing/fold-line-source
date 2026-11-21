@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="en" class="hero-on" data-hero="fold">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Fold Line · Guided treks, folded</title>
+<meta name="description" content="Fold Line, guided treks and expeditions since 2011. Every trek comes with its own folded pocket map. Five to start with: Tongariro, the Inca Trail, the W Trek, Kilimanjaro and Everest Base Camp." />
+
+<!--
+  CREATIVE DIRECTION . THE LONG FOLD (V1)
+  Mood: sunny, cartographic, playful, handmade.
+  Palette: paper #F6EFE2, ink navy #2B3A55, route red #D9573B (the only accent),
+           day tints sage #A9C79A, slate #9AAAB8, tarn #7FB3C4, dusk indigo #3E4470
+           with butter windows #FFD66E, ochre #E3B35E, table #C9A67E.
+  Type: Fraunces (display, SOFT and WONK axes), Instrument Sans (UI), DM Mono (map labels, numbers).
+  Motion: lively and bouncy. Paper springs around k 150 / c 12, Lenis 1.0, DOM on power3.out.
+  Camera: a lateral dolly on a rail. 3/4 view about 24 degrees above the table, 34 degree lens,
+          travelling left to right along the open map, look-at leading the move, a small rise
+          and fall between panels. No orbit, no free flight.
+
+  SETUP NOTE. One file, classic scripts only, so it runs from a double click on file://.
+  Every panel, cut-out and letter is drawn into a 2D canvas at boot. No binary assets.
+-->
+
+<!-- V5: the fold hero is the page, no ?hero= needed (Drawer and Stack live on in V2 to V4).
+     hero-on is on <html> from the first paint, so the hero copy is hidden from frame one and the hero's intro owns the reveal -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<!-- V6: every typeface comes from hero/look.js (Unbounded, Martian Mono, Instrument Sans, Sam's pick of the font round) -->
+<script src="hero/look.js"></script>
+
+<style>
+:root{
+  --paper:#F6EFE2;
+  --paper-hi:#FBF7EE;
+  --paper-dk:#EADFCB;
+  --ink:#2B3A55;
+  --ink-soft:#4A5670;
+  --ink-faint:#6B7488;
+  --red:#D9573B;
+  --table:#C9A67E;
+  --pad-x:clamp(16px,3.2vw,48px);
+  --pad-y:clamp(14px,2.6vh,30px);
+  --strip-h:64px;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  --serif:Fraunces,Georgia,serif;
+}
+*{box-sizing:border-box;}
+html{background:var(--table);color:var(--ink);-webkit-text-size-adjust:100%;}
+body{
+  margin:0;background:var(--table);
+  font-family:"Instrument Sans",system-ui,-apple-system,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+
+/* ---------- stage ---------- */
+.stage{position:fixed;inset:0;z-index:0;}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
+/* a warm lamp over the table, the corners fall off like a real desk */
+.lamp{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(90% 70% at 38% 34%, rgba(255,246,228,0.16) 0%, rgba(255,246,228,0) 60%),
+    radial-gradient(140% 110% at 50% 45%, rgba(60,36,14,0) 55%, rgba(60,36,14,0.22) 100%);
+}
+/* dusk and gold are washes over the render, driven from the camera's rail position */
+.dusk{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;
+  background:radial-gradient(120% 90% at 50% 20%, rgba(62,68,112,0.30) 0%, rgba(30,30,70,0.52) 100%);
+  mix-blend-mode:multiply;}
+.gold{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;
+  background:radial-gradient(90% 80% at 20% 10%, rgba(255,214,110,0.30) 0%, rgba(227,179,94,0.10) 55%, rgba(227,179,94,0) 100%);
+  mix-blend-mode:soft-light;}
+.grain{
+  position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0.09;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='0.38'/></svg>");
+  mix-blend-mode:multiply;
+}
+
+/* ---------- header ---------- */
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:8;display:flex;align-items:flex-start;justify-content:space-between;
+  padding:var(--pad-y) var(--pad-x);pointer-events:none;gap:16px;
+}
+.top > *{pointer-events:auto;}
+.brand{display:flex;align-items:baseline;gap:12px;text-decoration:none;color:var(--ink);}
+.brand-name{
+  font-family:var(--serif);font-weight:640;font-size:23px;letter-spacing:-0.01em;line-height:1;
+  font-variation-settings:"SOFT" 100, "WONK" 1, "opsz" 72;
+}
+.brand-sub{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);}
+.brand,.brand-sub{transition:color .6s ease;}
+.night .brand{color:var(--paper);}
+.night .brand-sub{color:rgba(246,239,226,0.72);}
+
+/* paper chip: the background is a filtered pseudo element so the deckle
+   displacement chews the paper edge without wobbling the text on top */
+.chip{
+  position:relative;border:0;background:none;padding:10px 17px 11px;margin:0;
+  font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:10px;line-height:1;isolation:isolate;
+}
+.chip::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(168deg,var(--paper-hi) 0%,var(--paper) 58%,#EFE5D2 100%);
+  filter:url(#deckle) drop-shadow(0 3px 6px rgba(70,44,20,0.22)) drop-shadow(0 1px 0 rgba(255,255,255,0.6));
+}
+.chip > *{position:relative;z-index:1;}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--red);}
+.book-top{transform:rotate(0.8deg);transition:transform .45s cubic-bezier(.2,.9,.25,1);}
+.book-top:hover{transform:rotate(-0.4deg) translateY(-2px);}
+:where(.chip,a,button):focus-visible{outline:2px solid var(--ink);outline-offset:5px;border-radius:2px;}
+
+/* ---------- document ---------- */
+main{position:relative;z-index:4;pointer-events:none;}
+main a,main button,main .card,main .book{pointer-events:auto;}
+section{position:relative;}
+.hero{height:100vh;}
+.unfold{height:40vh;}
+.day{height:118vh;}
+.finale{height:110vh;}
+.close{height:80vh;}
+
+.k{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-soft);margin:0;}
+
+/* hero copy sits on the bare table, left of the folded map */
+.hero-copy{
+  position:fixed;left:var(--pad-x);top:50%;transform:translateY(-46%);
+  width:min(560px, 44vw);pointer-events:auto;
+}
+.hero h1{
+  font-family:var(--serif);font-weight:560;font-size:clamp(44px,5.6vw,88px);line-height:0.98;letter-spacing:-0.022em;
+  margin:18px 0 22px;color:var(--ink);
+  font-variation-settings:"SOFT" 100, "WONK" 1, "opsz" 144;
+  text-wrap:balance;
+}
+.hero h1 em{font-style:italic;font-weight:480;color:var(--ink);}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:0.08em;margin-bottom:-0.08em;}
+.hero h1 .ln > span{display:inline-block;}
+.lede{font-size:clamp(15px,1.15vw,17px);line-height:1.6;color:var(--ink-soft);max-width:36ch;margin:0 0 26px;text-wrap:pretty;}
+.hint{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);}
+.hint svg{animation:nudge 2.2s cubic-bezier(.45,0,.25,1) infinite;}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+
+/* ---------- field-notebook cards ---------- */
+.card{
+  position:fixed;left:var(--pad-x);bottom:calc(var(--strip-h) + 34px);z-index:6;
+  width:min(372px, calc(100vw - 2*var(--pad-x)));
+  padding:20px 22px 18px 34px;isolation:isolate;
+  opacity:0;visibility:hidden;transform:translateY(24px) rotate(-1.2deg);
+}
+.card::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:
+    linear-gradient(90deg, transparent 21px, rgba(217,87,59,0.55) 21px, rgba(217,87,59,0.55) 22.5px, transparent 22.5px),
+    repeating-linear-gradient(180deg, transparent 0 23px, rgba(43,58,85,0.075) 23px 24px),
+    linear-gradient(170deg,var(--paper-hi) 0%,var(--paper) 60%,#EFE4D0 100%);
+  filter:url(#deckle) drop-shadow(0 6px 14px rgba(60,36,14,0.26)) drop-shadow(0 1px 0 rgba(255,255,255,0.5));
+}
+.card h2{
+  font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.02;letter-spacing:-0.015em;margin:8px 0 12px;
+  font-variation-settings:"SOFT" 100, "WONK" 1, "opsz" 96;
+}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:0 0 12px;}
+.stats div{min-width:0;}
+.stats dt{font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);}
+.stats dd{margin:1px 0 0;font-family:var(--mono);font-size:13px;color:var(--ink);white-space:nowrap;}
+.stats .wide{grid-column:1 / -1;}
+.note{margin:0;font-size:14px;line-height:1.55;color:var(--ink-soft);text-wrap:pretty;}
+.tap{margin:10px 0 0;font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);}
+
+/* ---------- elevation strip ---------- */
+.strip{
+  position:fixed;left:var(--pad-x);right:var(--pad-x);bottom:14px;height:var(--strip-h);z-index:6;
+  display:flex;align-items:stretch;gap:14px;padding:8px 14px 6px;isolation:isolate;
+  opacity:0;visibility:hidden;
+}
+.strip::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(251,247,238,0.94),rgba(242,233,216,0.94));
+  filter:url(#deckle) drop-shadow(0 4px 10px rgba(60,36,14,0.20));
+}
+.strip svg{flex:1;min-width:0;height:100%;display:block;overflow:visible;}
+.readout{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:3px;min-width:112px;font-family:var(--mono);}
+.readout b{font-weight:500;font-size:15px;color:var(--ink);letter-spacing:0.02em;}
+.readout span{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);}
+
+/* ---------- finale and close ---------- */
+.finale-line{
+  position:fixed;left:50%;top:clamp(76px,13vh,130px);transform:translate(-50%,16px);z-index:6;
+  width:min(900px, calc(100vw - 2*var(--pad-x)));text-align:center;opacity:0;visibility:hidden;
+}
+.finale-line h2{
+  font-family:var(--serif);font-weight:560;font-size:clamp(28px,3.6vw,54px);line-height:1.04;letter-spacing:-0.018em;margin:10px 0 0;
+  font-variation-settings:"SOFT" 100, "WONK" 1, "opsz" 144;text-wrap:balance;
+}
+.finale-line h2 em{font-style:italic;font-weight:470;}
+.book{
+  position:fixed;left:var(--pad-x);top:50%;transform:translateY(-44%);z-index:6;
+  width:min(520px, 42vw);opacity:0;visibility:hidden;
+}
+.book h2{
+  font-family:var(--serif);font-weight:560;font-size:clamp(34px,4.2vw,64px);line-height:1;letter-spacing:-0.02em;margin:14px 0 22px;
+  font-variation-settings:"SOFT" 100, "WONK" 1, "opsz" 144;text-wrap:balance;
+}
+.cta-big{font-family:var(--serif);font-size:21px;font-weight:600;padding:16px 26px 17px;transform:rotate(-0.8deg);
+  font-variation-settings:"SOFT" 100, "WONK" 1;transition:transform .45s cubic-bezier(.2,.9,.25,1);}
+.cta-big:hover{transform:rotate(0.3deg) translateY(-2px);}
+.cta-big .arrow{color:var(--red);font-family:var(--mono);font-size:16px;}
+.facts{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:6px 26px;margin:28px 0 18px;}
+.facts dt{font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);}
+.facts dd{margin:2px 0 0;font-size:14px;color:var(--ink);}
+.small{font-size:12px;line-height:1.6;color:var(--ink-soft);max-width:52ch;margin:0;}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
+
+.fallback{position:fixed;inset:0;z-index:9;display:none;place-items:center;text-align:center;padding:40px;font-size:15px;color:var(--ink);background:var(--table);}
+.fallback p{max-width:52ch;}
+.no-webgl .fallback{display:grid;}
+.no-webgl .stage{display:none;}
+
+/* ---------- narrow and portrait ---------- */
+@media (max-width:760px){
+  :root{--strip-h:50px;}
+  .brand-sub{display:none;}
+  .hero-copy{top:calc(var(--pad-y) + 58px);transform:none;width:auto;right:var(--pad-x);}
+  .hero h1{font-size:clamp(38px,11vw,56px);margin:12px 0 14px;}
+  .lede{font-size:14.5px;margin-bottom:16px;}
+  .card{bottom:calc(var(--strip-h) + 22px);padding:14px 16px 13px 28px;}
+  .card::before{background:
+    linear-gradient(90deg, transparent 16px, rgba(217,87,59,0.55) 16px, rgba(217,87,59,0.55) 17.5px, transparent 17.5px),
+    repeating-linear-gradient(180deg, transparent 0 21px, rgba(43,58,85,0.075) 21px 22px),
+    linear-gradient(170deg,var(--paper-hi) 0%,var(--paper) 60%,#EFE4D0 100%);}
+  .card h2{font-size:24px;margin:5px 0 8px;}
+  .stats{grid-template-columns:repeat(4,auto);gap:4px 12px;margin-bottom:8px;}
+  .stats dd{font-size:11.5px;white-space:normal;}
+  .stats dt{font-size:8.5px;}
+  .stats .wide{display:none;}
+  .note{font-size:13px;line-height:1.5;}
+  .tap{display:none;}
+  .strip{bottom:10px;padding:6px 10px 5px;gap:8px;}
+  .readout{min-width:78px;}
+  .readout b{font-size:13px;}
+  .book{top:calc(var(--pad-y) + 58px);transform:none;width:auto;right:var(--pad-x);}
+  .facts{grid-template-columns:1fr 1fr;}
+}
+@media (prefers-reduced-motion:reduce){
+  .hint svg{animation:none;}
+  .chip,.cta-big,.book-top{transition:none;}
+}
+
+/* ---------- the hero (hero/fold.js on hero/hero-kit.js). everything else lives in hero/*.js ---------- */
+html.hero-on,html.hero-on body{background:#0a0909;}   /* the room is dark from the first paint, the canvas's own boot black (V5 round 1: a grey to black step at 0.85 s) */
+html.hero-on .lamp,html.hero-on .grain{display:none;}
+html.hero-on .hero-copy,html.hero-on .top{visibility:hidden;}
+/* V3: V1's notebook cards and elevation strip are the cartoon interior's UI, hidden until it is redesigned */
+html[data-hero="fold"] .card,html[data-hero="fold"] .strip{display:none !important;}
+.hero-exit{height:0;}
+html.hero-on .hero-exit{height:var(--hero-exit,150vh);}
+/* the scroll position where the cover has just swung open: recordings end here */
+.handoff{position:absolute;left:0;top:0;width:1px;height:1px;pointer-events:none;}
+/* &tour draws a cursor so a recording shows where the scripted pointer is */
+.tour-cursor{position:fixed;left:0;top:0;z-index:50;width:22px;height:22px;pointer-events:none;margin:-2px 0 0 -3px;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.35));transition:transform .12s ease-out;}
+.tour-cursor.down{transform:scale(0.86);}
+</style>
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <canvas id="scene"></canvas>
+  <div class="lamp"></div>
+  <div class="dusk" id="dusk"></div>
+  <div class="gold" id="gold"></div>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <a class="brand" href="#top" id="brand" aria-label="Fold Line, back to the top">
+    <!-- V6: the mark is a mountain cut from three layers of paper, stood at an angle (Sam, 16 Oct 2026). "since 2011" moved into the lede -->
+    <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 50 42" focusable="false">
+      <defs><filter id="fl-sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1.3" dy="0.2" stdDeviation="0.8" flood-color="#2a1a0c" flood-opacity="0.6"/></filter>
+      <filter id="fl-cast" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.7"/></filter></defs>
+      <g transform="translate(1 1)">
+        <path class="bm-cast" d="M8 38 L23.2 7.2 Q24 5.8 24.8 7.2 L41 38 Z" fill="#000" opacity=".55" filter="url(#fl-cast)" transform="translate(5 1.5) skewX(-16)"/>
+        <path d="M8 38 L23.2 7.2 Q24 5.8 24.8 7.2 L41 38 Z" fill="#9C8B70" transform="translate(.9 .7)"/>
+        <path d="M8 38 L23.2 7.2 Q24 5.8 24.8 7.2 L41 38 Z" fill="#F4EEE3"/>
+        <path d="M24 6.4 L8.4 38" stroke="#fff" stroke-width=".8" opacity=".9"/>
+        <g filter="url(#fl-sh)"><path d="M2 38 L12.5 20.5 Q13.4 19.3 14.4 20.3 L19 25 L27.3 15.6 Q28.2 14.7 29 15.7 L42 38 Z" fill="#A8946F" transform="translate(.9 .7)"/>
+          <path d="M2 38 L12.5 20.5 Q13.4 19.3 14.4 20.3 L19 25 L27.3 15.6 Q28.2 14.7 29 15.7 L42 38 Z" fill="#E2D2B4"/></g>
+        <g filter="url(#fl-sh)"><path d="M0 38 L8.5 29 Q9.4 28.2 10.3 28.9 L16 33 L22 27.4 Q23 26.6 24 27.4 L33 34 L38 30.5 Q39 29.9 39.8 30.6 L46 38 Z" fill="#8E714A" transform="translate(.9 .7)"/>
+          <path d="M0 38 L8.5 29 Q9.4 28.2 10.3 28.9 L16 33 L22 27.4 Q23 26.6 24 27.4 L33 34 L38 30.5 Q39 29.9 39.8 30.6 L46 38 Z" fill="#C7A97C"/></g>
+        <circle cx="24" cy="6.9" r="2.4" fill="#C8432B" filter="url(#fl-sh)"/>
+      </g>
+    </svg></span>
+    <span class="brand-name">Fold Line</span>
+  </a>
+  <a class="chip book-top" href="#book" id="bookTop"><span class="dot" aria-hidden="true"></span><span class="bt-label">Book a trek</span><span class="bt-ar" aria-hidden="true">→</span></a>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="h-hero">
+    <div class="hero-copy" id="heroCopy">
+      <p class="k fx">The Valmora Round &nbsp; 5 days &nbsp; hut to hut</p>
+      <h1 id="h-hero"><span class="ln"><span>A walk you take</span></span><span class="ln"><span>by <em>unfolding</em> it.</span></span></h1>
+      <p class="lede fx">Five days across the Valmora Alps, four huts and a bakery at the bottom. The whole thing fits on one folded map.</p>
+      <p class="hint fx"><span>Scroll to unfold</span>
+        <svg width="34" height="12" viewBox="0 0 34 12" fill="none" aria-hidden="true"><path d="M1 6h30M26 1.5 31.5 6 26 10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </p>
+    </div>
+  </section>
+
+  <section class="hero-exit" aria-hidden="true"></section>
+  <div class="handoff" id="handoff" aria-hidden="true"></div>
+
+  <section class="unfold" aria-hidden="true"></section>
+
+  <section class="day" aria-labelledby="h-d1">
+    <article class="card" data-day="0">
+      <p class="k">Day 1 of 5 &nbsp; San Lucio to Lares</p>
+      <h2 id="h-d1">Day 1. The valley</h2>
+      <dl class="stats">
+        <div><dt>Distance</dt><dd>11.4 km</dd></div>
+        <div><dt>Walking</dt><dd>4 h 30</dd></div>
+        <div><dt>Up / down</dt><dd>+980 / &minus;164 m</dd></div>
+        <div><dt>Sleep</dt><dd>Rifugio Lares</dd></div>
+        <div class="wide"><dt>Hut altitude</dt><dd>1&nbsp;948 m</dd></div>
+      </dl>
+      <p class="note">The bus drops you at the church in San Lucio and the path follows the river up through the larches. Have lunch in the meadow with the bench, there is only one.</p>
+      <p class="tap">Tap any cut-out, it wobbles</p>
+    </article>
+  </section>
+
+  <section class="day" aria-labelledby="h-d2">
+    <article class="card" data-day="1">
+      <p class="k">Day 2 of 5 &nbsp; over Passo del Corvo</p>
+      <h2 id="h-d2">Day 2. The pass</h2>
+      <dl class="stats">
+        <div><dt>Distance</dt><dd>12.8 km</dd></div>
+        <div><dt>Walking</dt><dd>6 h 15</dd></div>
+        <div><dt>Up / down</dt><dd>+1&nbsp;020 / &minus;610 m</dd></div>
+        <div><dt>Sleep</dt><dd>Capanna Corvo</dd></div>
+        <div class="wide"><dt>Highest point</dt><dd>Passo del Corvo, 2&nbsp;614 m</dd></div>
+      </dl>
+      <p class="note">Forty-one switchbacks of loose scree to the pass, the long climb of the week. Leave by seven and the clouds are usually sitting below you by eleven.</p>
+    </article>
+  </section>
+
+  <section class="day" aria-labelledby="h-d3">
+    <article class="card" data-day="2">
+      <p class="k">Day 3 of 5 &nbsp; a short one, on purpose</p>
+      <h2 id="h-d3">Day 3. The lake</h2>
+      <dl class="stats">
+        <div><dt>Distance</dt><dd>10.6 km</dd></div>
+        <div><dt>Walking</dt><dd>4 h</dd></div>
+        <div><dt>Up / down</dt><dd>+420 / &minus;552 m</dd></div>
+        <div><dt>Sleep</dt><dd>Rif. Lago Scuro</dd></div>
+        <div class="wide"><dt>Water temperature</dt><dd>About 9&nbsp;&deg;C in July</dd></div>
+      </dl>
+      <p class="note">Lago Scuro is cold enough to make grown adults shout. The hut lends out a rowing boat with one good oar, so you mostly go in circles.</p>
+    </article>
+  </section>
+
+  <section class="day" aria-labelledby="h-d4">
+    <article class="card" data-day="3">
+      <p class="k">Day 4 of 5 &nbsp; the highest bed</p>
+      <h2 id="h-d4">Day 4. The high hut</h2>
+      <dl class="stats">
+        <div><dt>Distance</dt><dd>9.2 km</dd></div>
+        <div><dt>Walking</dt><dd>4 h 15</dd></div>
+        <div><dt>Up / down</dt><dd>+712 / &minus;207 m</dd></div>
+        <div><dt>Sleep</dt><dd>Capanna Alta Vedra</dd></div>
+        <div class="wide"><dt>Hut altitude</dt><dd>2&nbsp;731 m, twelve bunks, one stove</dd></div>
+      </dl>
+      <p class="note">Dinner is at seven and it is whatever the warden made. Nobody manages to sleep before the stars come out, and nobody minds.</p>
+    </article>
+  </section>
+
+  <section class="day" aria-labelledby="h-d5">
+    <article class="card" data-day="4">
+      <p class="k">Day 5 of 5 &nbsp; all of it downhill</p>
+      <h2 id="h-d5">Day 5. Down to Sella</h2>
+      <dl class="stats">
+        <div><dt>Distance</dt><dd>14.0 km</dd></div>
+        <div><dt>Walking</dt><dd>5 h 30</dd></div>
+        <div><dt>Up / down</dt><dd>+95 / &minus;1&nbsp;640 m</dd></div>
+        <div><dt>Bus</dt><dd>16:10, Sella</dd></div>
+        <div class="wide"><dt>Finish</dt><dd>Forno Sella, 1&nbsp;186 m</dd></div>
+      </dl>
+      <p class="note">Down through the apricot orchards into Sella, where the bakery keeps the last tart back for walkers. The bus leaves from right outside.</p>
+    </article>
+  </section>
+
+  <section class="finale" aria-labelledby="h-fin">
+    <div class="finale-line" id="finaleLine">
+      <p class="k">San Lucio 1&nbsp;132 m &nbsp; to &nbsp; Sella 1&nbsp;186 m</p>
+      <h2 id="h-fin">Five days, 58&nbsp;km, four huts <em>and one bakery.</em></h2>
+    </div>
+  </section>
+
+  <section class="close" id="book" aria-labelledby="h-book">
+    <div class="book" id="bookPanel">
+      <p class="k">Season 2027 &nbsp; small groups</p>
+      <h2 id="h-book">Fold it back up. Then come and walk it.</h2>
+      <a class="chip cta-big" href="#book" id="bookCta"><span>Book the walk</span><span class="arrow" aria-hidden="true">&#8594;</span></a>
+      <dl class="facts">
+        <div><dt>Season</dt><dd>21 June to 19 September</dd></div>
+        <div><dt>Group</dt><dd>6 to 8 walkers, one guide</dd></div>
+        <div><dt>From</dt><dd>&euro;1&nbsp;240 per person</dd></div>
+      </dl>
+      <p class="small">Half board in the huts, shared bunk rooms, so bring a sleeping liner. We move dates for weather and never cancel for small numbers. The 16:10 from Sella meets the 17:05 train at Ponte Alto.</p>
+    </div>
+  </section>
+</main>
+
+<aside class="strip" id="strip" aria-label="Elevation profile of the route">
+  <svg id="profile" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="readout"><b id="roAlt">1 132 m</b><span id="roKm">km 0.0</span></div>
+</aside>
+
+<div class="fallback">
+  <p>This page draws its folding map with WebGL, and this browser will not give it a context. The map reads: five days hut to hut in the Valmora Alps, from the church in San Lucio to the bakery in Sella, 58 km, four huts. The bus home leaves at 16:10.</p>
+</div>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <!-- torn paper edge for the DOM chips -->
+    <filter id="deckle" x="-12%" y="-25%" width="124%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035 0.13" numOctaves="3" seed="12" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(async function boot(){
+'use strict';
+
+/* ============================================================
+   KNOBS. the things worth tweaking live here.
+   ============================================================ */
+const KNOB = {
+  PANEL_W: 7.2,        // one day of map, left to right
+  PANEL_D: 9.6,        // front to back
+  ZIG: 0.045,          // radians each open panel keeps of its fold, so the creases read
+  LENS: 34,            // rail lens (portrait widens it a little)
+  ELEV: 24,            // degrees above the table on the rail
+  YAW: -9,             // degrees, the camera sits a touch left, looking the way it travels
+  LEAD: 0.9,           // how far the look-at runs ahead of the camera mid move
+  RISE: 0.75,          // hop between panels
+  TILT: 0.03,          // mouse tilt, radians, max
+  SPRING_K: 150, SPRING_C: 12,
+  LENIS: 1.0,
+  SCROLL_EASE: 7.5,    // how fast the smoothed progress chases the scroll
+  HIKER_H: 0.62,
+  ROUTE_W: 0.085, DASH: 0.26,
+  SHADOW: 2048
+};
+
+const Q = new URLSearchParams(location.search);
+const PQ = Q.has('p') ? Math.max(0, Math.min(1, parseFloat(Q.get('p')) || 0)) : null;
+
+/* ---- the hero: the fold (V3), always on from V5. ?hero= is ignored, Drawer and Stack live on in V2 to V4.
+   ?hx=0.5 jumps to half way through the hero's exit, the way ?p= jumps the page ---- */
+const HERO = 'fold';
+const HXQ = Q.has('hx') ? Math.max(0, Math.min(1, parseFloat(Q.get('hx')) || 0)) : null;
+const DEBUG = PQ !== null || HXQ !== null;
+// over http every load asks for fresh copies: Safari kept page scripts it judged still fresh and ran them after a reload
+// (V6, 17 Oct 2026). from file:// the query is left off
+const FRESH = /^https?:/.test(location.protocol) ? '?v=' + Date.now() : '';
+function loadScript(src){
+  return new Promise(res => { const s = document.createElement('script'); s.src = src + FRESH; s.onload = () => res(true); s.onerror = () => res(false); document.head.appendChild(s); });
+}
+let HERO_ON = false;
+{
+  // in order: data first, then the shared kit, then the hero that registers itself
+  for(const f of ['hero/terrain-data.js', 'hero/treks-data.js', 'hero/hero-kit.js', 'hero/globe-data.js', 'hero/globe.js', 'hero/arrows.js', 'hero/spines.js', 'hero/switch.js', 'hero/fold.js']) await loadScript(f);
+  HERO_ON = !!(window.HERO_KIT && window.HERO_OPTIONS && window.HERO_OPTIONS[HERO]);
+  if(!HERO_ON){ console.warn('the hero did not load'); document.documentElement.classList.remove('hero-on'); }
+}
+/* ---- V4's interior: the real Tongariro map in cut paper (interior/interior.js).
+   ?interior=none shows V1's Valmora interior instead, the before ---- */
+const IQ = (Q.get('interior') || '').replace(/[^a-z]/g, '');
+const IMODE = IQ === 'none' ? null : (IQ || 'story');
+let IN = null;
+if(IMODE){
+  const files = (window.TREKS ? [] : ['hero/treks-data.js']).concat(window.HERO_KIT ? [] : ['hero/hero-kit.js'], ['interior/tongariro-strip.js', 'interior/interior.js']);
+  for(const f of files) await loadScript(f);
+  IN = window.INTERIOR ? window.INTERIOR.create(IMODE) : null;
+  if(!IN) console.warn('interior "' + IMODE + '" did not load');
+}
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HALF_PI = Math.PI*0.5, PI = Math.PI;
+const PW = KNOB.PANEL_W, PD = KNOB.PANEL_D, NP = 5;
+
+const COL = {
+  paper:'#F6EFE2', paperHi:'#FBF7EE', paperDk:'#E9DDC7', ink:'#2B3A55', inkSoft:'#56627A',
+  red:'#D9573B', redDk:'#B9442C', sepia:'#8B6B4A',
+  sage:'#A9C79A', sageLt:'#C9DDBC', sageDk:'#7FA36E', sageDp:'#5E8558',
+  slate:'#9AAAB8', slateLt:'#C3CDD6', slateDk:'#728396', slateDp:'#56677B',
+  tarn:'#7FB3C4', tarnLt:'#B5D5DF', tarnDk:'#5A93A8',
+  indigo:'#3E4470', indigoLt:'#5E6496', indigoDk:'#2A2F55',
+  butter:'#FFD66E', butterDk:'#F2BC45',
+  ochre:'#E3B35E', ochreLt:'#F0CF8E', ochreDk:'#C8923E',
+  pine:'#5F806B', pineDk:'#46634F', bark:'#8C6A4E', stone:'#B7B2A6', stoneDk:'#8E897D',
+  table:'#C9A67E'
+};
+const DAY_TINT = [COL.sage, COL.slate, COL.tarn, '#8F93B8', COL.ochre];
+
+/* ============================================================
+   0. renderer
+   ============================================================ */
+const canvas = document.getElementById('scene');
+let renderer = null;
+try{
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false, powerPreference:'high-performance' });
+}catch(err){ renderer = null; }
+if(!renderer || !renderer.getContext()){
+  document.documentElement.classList.add('no-webgl');
+  return;
+}
+const dprCap = () => (window.innerWidth*window.innerHeight > 2600000) ? 1.5 : 1.75;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap()));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const MAX_ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+
+const scene = new THREE.Scene();
+const tableCol = new THREE.Color(COL.table);
+scene.background = tableCol.clone();
+scene.fog = new THREE.Fog(tableCol.clone(), 40, 160);
+const camera = new THREE.PerspectiveCamera(KNOB.LENS, 1, 0.4, 400);
+
+/* ============================================================
+   1. canvas helpers, lifted from the theatre. every silhouette is
+      drawn white on black, blurred, then read by the shader as a
+      soft alpha field so the cut edge can be chewed by noise.
+   ============================================================ */
+function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+
+function shapeCanvas(w,h,draw,blurPx){
+  const P = Math.ceil(blurPx*3)+2;
+  const src = mk(w+P*2, h+P*2);
+  const a = src.getContext('2d');
+  a.fillStyle='#000'; a.fillRect(0,0,src.width,src.height);
+  a.save(); a.translate(P,P); a.fillStyle='#fff'; a.strokeStyle='#fff'; draw(a,w,h,P); a.restore();
+  const bl = mk(src.width, src.height);
+  const b = bl.getContext('2d');
+  b.fillStyle='#000'; b.fillRect(0,0,bl.width,bl.height);
+  b.filter = 'blur('+blurPx+'px)';
+  b.drawImage(src,0,0);
+  b.filter = 'none';
+  const out = mk(w,h);
+  // hint set on first acquire: click picking reads single pixels back from this
+  out.getContext('2d', { willReadFrequently:true }).drawImage(bl, P, P, w, h, 0, 0, w, h);
+  return out;
+}
+function colourCanvas(w,h,base,draw){
+  const c = mk(w,h); const x = c.getContext('2d');
+  x.fillStyle = base; x.fillRect(0,0,w,h);
+  if(draw) draw(x,w,h,0);
+  return c;
+}
+function tex(cv, srgb){
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.magFilter = THREE.LinearFilter;
+  t.anisotropy = MAX_ANISO;
+  t.needsUpdate = true;
+  return t;
+}
+function rng(seed){ let s = seed>>>0 || 1; return function(){ s = (s*1664525 + 1013904223)>>>0; return s/4294967296; }; }
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const seg = (v,a,b) => clamp01((v-a)/(b-a));
+const smooth = t => t*t*(3-2*t);
+const ease3 = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+const lerp = (a,b,t) => a + (b-a)*t;
+
+/* ============================================================
+   2. the paper shader, grafted onto MeshStandardMaterial so it keeps
+      real lights and real shadow maps. same engine as the theatre.
+   ============================================================ */
+const NOISE = `
+float pHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
+float pNoise(vec2 p){
+  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+  return mix(mix(pHash(i),pHash(i+vec2(1.0,0.0)),u.x),
+             mix(pHash(i+vec2(0.0,1.0)),pHash(i+vec2(1.0,1.0)),u.x), u.y);
+}
+float pFbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*pNoise(p); p*=2.07; a*=0.5; } return v; }
+`;
+const V_PARS = `
+uniform float uSeed;
+uniform float uWarp;
+uniform vec3  uWarpF;
+`;
+// subtle warping so no sheet is dead flat, with the normal rebuilt to match
+const V_NORMAL = `
+vec3 objectNormal = vec3( normal );
+float _dx = uWarp * ( cos(position.x*uWarpF.x + uSeed)*0.55*uWarpF.x
+                    + cos((position.x+position.y)*uWarpF.z + uSeed*2.3)*0.25*uWarpF.z );
+float _dy = uWarp * ( cos(position.y*uWarpF.y + uSeed*1.7)*0.35*uWarpF.y
+                    + cos((position.x+position.y)*uWarpF.z + uSeed*2.3)*0.25*uWarpF.z );
+objectNormal = normalize( vec3(-_dx, -_dy, 1.0) );
+`;
+const V_POS = `
+vec3 transformed = vec3( position );
+transformed.z += uWarp * ( sin(position.x*uWarpF.x + uSeed)*0.55
+                         + sin(position.y*uWarpF.y + uSeed*1.7)*0.35
+                         + sin((position.x+position.y)*uWarpF.z + uSeed*2.3)*0.25 );
+`;
+const F_PARS = `
+uniform float uSeed;
+uniform float uDeckle;
+uniform float uFibre;
+uniform float uRim;
+uniform float uContact;
+uniform float uAspect;
+uniform vec3  uRimCol;
+`;
+// noise displaced alpha edge, lighter cut core just inside it,
+// stretched fibre grain, flecks, and a contact darkening at the hinge
+const F_MAP = `
+vec2 _uv  = vMapUv;
+vec2 _nuv = vec2(_uv.x*uAspect, _uv.y);
+float _n1 = pFbm(_nuv*26.0 + uSeed);
+float _n2 = pFbm(_nuv*26.0 + uSeed + 19.7);
+vec2 _duv = _uv + (vec2(_n1,_n2)-0.5) * uDeckle * vec2(1.0/uAspect, 1.0);
+float _a  = texture2D(alphaMap, _duv).g;
+diffuseColor.rgb *= texture2D(map, _uv).rgb;
+float _grain = pFbm(vec2(_nuv.x*240.0, _nuv.y*26.0) + uSeed*3.0);
+float _cross = pFbm(vec2(_nuv.x*22.0, _nuv.y*190.0) + uSeed*5.0);
+float _blot  = pFbm(_nuv*6.0 + uSeed*0.7);
+diffuseColor.rgb *= 1.0 + uFibre*((_grain-0.5)*0.95 + (_cross-0.5)*0.55) + (_blot-0.5)*0.055;
+float _fleck = step(0.9965, pHash(floor(_nuv*680.0)));
+diffuseColor.rgb *= 1.0 - _fleck*0.15;
+float _band = smoothstep(0.50,0.585,_a) * (1.0 - smoothstep(0.585,0.80,_a));
+diffuseColor.rgb = mix(diffuseColor.rgb, uRimCol, _band*uRim);
+diffuseColor.rgb *= mix(1.0-uContact, 1.0, smoothstep(0.0, 0.085, _uv.y));
+float _fw = max(fwidth(_a), 0.0022);
+diffuseColor.a *= smoothstep(0.5-_fw, 0.5+_fw, _a);
+`;
+const F_DEPTH = `
+vec2 _uv  = vAlphaMapUv;
+vec2 _nuv = vec2(_uv.x*uAspect, _uv.y);
+float _n1 = pFbm(_nuv*26.0 + uSeed);
+float _n2 = pFbm(_nuv*26.0 + uSeed + 19.7);
+float _a  = texture2D(alphaMap, _uv + (vec2(_n1,_n2)-0.5)*uDeckle*vec2(1.0/uAspect,1.0)).g;
+diffuseColor.a *= step(0.5, _a);
+`;
+
+function makePaper(o){
+  const map  = tex(o.colour, true);
+  const amap = tex(o.shape, false);
+  const U = {
+    uSeed:{value:o.seed || 0},
+    uDeckle:{value:o.deckle === undefined ? 0.006 : o.deckle},
+    uFibre:{value:o.fibre === undefined ? 0.085 : o.fibre},
+    uRim:{value:o.rim === undefined ? 0.55 : o.rim},
+    uContact:{value:o.contact === undefined ? 0.22 : o.contact},
+    uAspect:{value:o.aspect || 1},
+    uRimCol:{value:new THREE.Color(o.rimCol || '#FFFDF4')},
+    uWarp:{value:o.warp === undefined ? 0.045 : o.warp},
+    uWarpF:{value:o.warpF ? new THREE.Vector3().fromArray(o.warpF) : new THREE.Vector3(0.9,0.7,0.5)}
+  };
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, map, alphaMap: amap,
+    roughness: 0.94, metalness: 0.0,
+    side: o.side !== undefined ? o.side : THREE.DoubleSide,
+    shadowSide: THREE.DoubleSide,
+    // the cut has to come from a real discard. alphaToCoverage alone is not
+    // dependable, and with alphaTest at 0 three never compiles the test in.
+    alphaTest: 0.5, alphaToCoverage: true, transparent: false
+  });
+  if(o.emissive){
+    // windows, stars and the moon get their own glow map, faded in at dusk
+    mat.emissiveMap = tex(o.emissive, true);
+    mat.emissive = new THREE.Color(o.emissiveCol || COL.butter);
+    mat.emissiveIntensity = 0;
+  }
+  mat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, U);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\n' + V_PARS)
+      .replace('#include <beginnormal_vertex>', V_NORMAL)
+      .replace('#include <begin_vertex>', V_POS);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + F_PARS + NOISE)
+      .replace('#include <map_fragment>', F_MAP)
+      .replace('#include <alphamap_fragment>', '');
+  };
+  mat.customProgramCacheKey = () => 'paper-lit';
+
+  // the shadow caster has to agree with the cut edge or the deckle is a lie
+  const depth = new THREE.MeshDepthMaterial({
+    depthPacking: THREE.RGBADepthPacking, alphaMap: amap, alphaTest: 0.5, side: THREE.DoubleSide
+  });
+  depth.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, U);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\n' + V_PARS)
+      .replace('#include <begin_vertex>', V_POS);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + F_PARS + NOISE)
+      .replace('#include <alphamap_fragment>', F_DEPTH);
+  };
+  depth.customProgramCacheKey = () => 'paper-depth';
+  return { mat, depth, U, map };
+}
+
+/* canvas type: every label on the map is DM Mono, the cover uses Fraunces.
+   the fonts have to land before any of it reaches a canvas. */
+try{
+  await Promise.race([
+    Promise.all([
+      document.fonts.load('600 120px Fraunces'),
+      document.fonts.load('italic 500 120px Fraunces'),
+      document.fonts.load('500 40px "DM Mono"'),
+      document.fonts.load('400 40px "DM Mono"'),
+      document.fonts.load('600 40px "Instrument Sans"')
+    ].concat(HERO_ON ? [
+      document.fonts.load('400 120px "Instrument Serif"'),
+      document.fonts.load('italic 400 120px "Instrument Serif"'),
+      document.fonts.load('400 40px "Instrument Sans"')
+    ] : []).concat(window.LOOK ? window.LOOK.loads().map(f => document.fonts.load(f)) : [])),
+    new Promise(r => setTimeout(r, 2500))
+  ]);
+}catch(e){ /* fall through to the fallback stacks */ }
+const MONO = (window.LOOK && window.LOOK.label) || '"DM Mono", ui-monospace, Menlo, monospace';
+const SERIF = 'Fraunces, Georgia, serif';
+function tracked(x, str, px, py, sp, align){
+  // manual tracking so labels print the same in every browser
+  let w = 0; const ws = [];
+  for(const ch of str){ const cw = x.measureText(ch).width; ws.push(cw); w += cw + sp; }
+  w -= sp;
+  let cx = align === 'center' ? px - w/2 : align === 'right' ? px - w : px;
+  let i = 0;
+  const prev = x.textAlign; x.textAlign = 'left';
+  for(const ch of str){ x.fillText(ch, cx, py); cx += ws[i++] + sp; }
+  x.textAlign = prev;
+  return w;
+}
+
+/* ============================================================
+   3. the map. one landscape for all five panels, so the contour
+      lines carry on across every crease the way a real sheet does.
+      X runs 0..36 left to right, Z runs -4.8 (back) to 4.8 (front).
+   ============================================================ */
+function hash2(i,j){
+  let h = (Math.imul(i, 374761393) + Math.imul(j, 668265263))|0;
+  h = Math.imul(h ^ (h>>>13), 1274126177);
+  return ((h ^ (h>>>16))>>>0)/4294967296;
+}
+function vnoise(x,y){
+  const i=Math.floor(x), j=Math.floor(y), fx=x-i, fy=y-j;
+  const u=fx*fx*(3-2*fx), v=fy*fy*(3-2*fy);
+  const a=hash2(i,j), b=hash2(i+1,j), c=hash2(i,j+1), d=hash2(i+1,j+1);
+  return a + (b-a)*u + (c-a)*v + (a-b-c+d)*u*v;
+}
+function fbm(x,y){ return vnoise(x,y)*0.5 + vnoise(x*2.03+5.1,y*2.03+1.7)*0.25 + vnoise(x*4.1+2.2,y*4.1+7.3)*0.125; }
+
+// summits: X, Z, height, radius. the pass on day 2 is the saddle between the first pair
+const PEAKS = [
+  [1.3,-4.3,0.9,2.5],[5.7,-3.9,1.2,2.4],
+  [8.9,-3.5,2.4,2.5],[13.5,-3.8,2.2,2.5],[11.2,-4.9,1.2,1.6],
+  [15.8,-4.0,1.8,2.4],[20.5,-3.7,2.0,2.6],
+  [23.0,-3.8,2.3,2.5],[26.9,-3.4,2.7,2.7],
+  [30.2,-4.1,1.7,2.6],[33.6,-4.5,1.0,2.2]
+];
+function heightAt(X,Z){
+  // the valley floors run along the front, where the path is
+  let h = 0.25 + 0.17*(-Z);
+  h += 0.55*Math.exp(-Math.pow((X-18)/10, 2));
+  for(let i=0;i<PEAKS.length;i++){
+    const p = PEAKS[i], dx = X-p[0], dz = (Z-p[1])*1.15;
+    h += p[2]*Math.exp(-(dx*dx + dz*dz)/(p[3]*p[3]));
+  }
+  // Lago Scuro sits in a bowl
+  h -= 0.65*Math.exp(-(Math.pow(X-18.1,2)/5.5 + Math.pow(Z-0.25,2)/1.4));
+  h += (fbm(X*0.62 + 3.0, Z*0.62 + 11.0) - 0.5)*0.6;
+  return h;
+}
+
+// the route, as walked. control points in map space, front strip only
+const ROUTE_CP = [
+  [0.55,3.55],[1.6,3.05],[2.9,3.5],[4.2,2.75],[5.5,3.2],[6.6,2.62],[7.7,2.95],
+  [8.4,3.55],[9.05,2.45],[9.75,3.45],[10.45,2.35],[11.15,3.3],[11.85,2.3],[12.9,2.85],[13.9,3.45],
+  [15.0,3.6],[16.2,2.9],[17.6,3.55],[19.0,3.0],[20.3,3.5],[21.4,2.8],
+  [22.4,3.2],[23.4,2.5],[24.5,3.5],[25.6,2.6],[26.8,3.35],[28.0,2.7],[28.9,3.1],
+  [30.0,3.6],[31.2,2.85],[32.4,3.4],[33.3,2.75],[34.15,2.45]
+];
+const ROUTE = IN ? IN.route(NP, PW) : (function(){
+  const pts = [];
+  const cp = ROUTE_CP;
+  for(let i=0;i<cp.length-1;i++){
+    const p0=cp[Math.max(0,i-1)], p1=cp[i], p2=cp[i+1], p3=cp[Math.min(cp.length-1,i+2)];
+    for(let k=0;k<24;k++){
+      const t=k/24, t2=t*t, t3=t2*t;
+      const cr = j => 0.5*((2*p1[j]) + (-p0[j]+p2[j])*t + (2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t2 + (-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t3);
+      pts.push([cr(0), cr(1)]);
+    }
+  }
+  pts.push(cp[cp.length-1].slice());
+  const s = [0];
+  for(let i=1;i<pts.length;i++) s.push(s[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]));
+  const L = s[s.length-1];
+  // arc length where the route crosses each crease, so each day draws its own share
+  const cross = [0];
+  for(let c=1;c<NP;c++){
+    const X = c*PW;
+    for(let i=1;i<pts.length;i++){
+      if(pts[i-1][0] < X && pts[i][0] >= X){
+        const f = (X - pts[i-1][0])/(pts[i][0]-pts[i-1][0]);
+        cross.push(s[i-1] + f*(s[i]-s[i-1])); break;
+      }
+    }
+  }
+  cross.push(L);
+  function at(sv){
+    sv = Math.max(0, Math.min(L, sv));
+    let lo = 0, hi = s.length-1;
+    while(hi - lo > 1){ const m = (lo+hi)>>1; if(s[m] <= sv) lo = m; else hi = m; }
+    const f = (sv - s[lo])/Math.max(1e-6, s[hi]-s[lo]);
+    const a = pts[lo], b = pts[hi];
+    return { x:a[0]+(b[0]-a[0])*f, z:a[1]+(b[1]-a[1])*f, dx:b[0]-a[0], dz:b[1]-a[1] };
+  }
+  return { pts, s, L, cross, at };
+})();
+
+// the real walk, for the notebook and the elevation strip
+const DAYS = [
+  { km:11.4, from:'San Lucio',  label:'SAN LUCIO', alt:'1 132 m', hut:'RIF. LARES 1948' },
+  { km:12.8, label:'PASSO DEL CORVO', alt:'2 614 m', hut:'CAP. CORVO 2358' },
+  { km:10.6, label:'LAGO SCURO', alt:'2 205 m', hut:'RIF. LAGO SCURO 2226' },
+  { km:9.2,  label:'CAPANNA ALTA VEDRA', alt:'2 731 m', hut:'CAP. ALTA VEDRA 2731' },
+  { km:14.0, label:'SELLA', alt:'1 186 m', hut:'SELLA 1186' }
+];
+const DAY_STATS = [
+  '11.4 KM   +980   -164', '12.8 KM   +1 020   -610', '10.6 KM   +420   -552', '9.2 KM   +712   -207', '14.0 KM   +95   -1 640'
+];
+const KM0 = [0]; DAYS.forEach((d,i)=>KM0.push(KM0[i] + d.km));
+// km, metres. hand drawn from the survey, the pass and the high hut are exact
+const PROFILE = [
+  [0,1132],[1.2,1150],[3,1236],[4.6,1352],[6.2,1470],[7.4,1452],[8.6,1611],[10.2,1822],[11.4,1948],
+  [13.0,2040],[14.8,2210],[16.5,2432],[18.2,2614],[19.4,2508],[21.0,2436],[22.6,2390],[24.2,2358],
+  [25.6,2442],[27.0,2505],[28.6,2398],[30.4,2262],[32.2,2205],[33.6,2216],[34.8,2226],
+  [36.4,2318],[38.2,2455],[40.1,2580],[42.2,2688],[44.0,2731],
+  [45.0,2786],[46.4,2604],[48.2,2352],[50.0,2080],[52.1,1788],[54.2,1520],[56.0,1330],[58.0,1186]
+];
+function altAt(km){
+  for(let i=1;i<PROFILE.length;i++){
+    if(km <= PROFILE[i][0]){
+      const a = PROFILE[i-1], b = PROFILE[i], f = (km - a[0])/(b[0]-a[0]);
+      return a[1] + (b[1]-a[1])*f;
+    }
+  }
+  return PROFILE[PROFILE.length-1][1];
+}
+
+/* ---- printing a panel ---- */
+const PCW = 690, PCH = 920, PPU = PCW/PW;          // canvas px per map unit
+const toPx = (x) => x*PPU;                          // panel local x
+const toPy = (z) => (z + PD*0.5)*PPU;               // panel local z, back at the top
+
+function hexA(hex, a){
+  const n = parseInt(hex.slice(1),16);
+  return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')';
+}
+
+// hill shading: a tiny image of the relief, scaled up soft
+function reliefCanvas(i, tint){
+  const w = 90, h = 120, c = mk(w,h), x = c.getContext('2d'), img = x.createImageData(w,h);
+  const t = parseInt(tint.slice(1),16), tr=(t>>16)&255, tg=(t>>8)&255, tb=t&255;
+  for(let py=0; py<h; py++){
+    for(let px=0; px<w; px++){
+      const X = i*PW + (px/(w-1))*PW, Z = -PD*0.5 + (py/(h-1))*PD, e = 0.08;
+      const hx = heightAt(X+e,Z) - heightAt(X-e,Z), hz = heightAt(X,Z+e) - heightAt(X,Z-e);
+      // light from the back left, the classic cartographer's northwest
+      let sh = (-hx*0.9 - hz*0.7)/(2*e);
+      sh = Math.max(-1, Math.min(1, sh*0.55));
+      const H = heightAt(X,Z), k = (py*w + px)*4;
+      const up = Math.max(0, Math.min(1, (H - 0.6)/2.4));
+      // higher ground takes more of the day tint, shaded slopes go a touch sepia
+      img.data[k]   = tr; img.data[k+1] = tg; img.data[k+2] = tb;
+      img.data[k+3] = Math.round(255*Math.max(0, 0.05 + up*0.32 - sh*0.16));
+      if(sh > 0.15){ img.data[k]=255; img.data[k+1]=252; img.data[k+2]=240; img.data[k+3]=Math.round(255*sh*0.20); }
+    }
+  }
+  x.putImageData(img,0,0);
+  return c;
+}
+
+function contours(x, i){
+  const gs = 8, gw = Math.ceil(PCW/gs)+1, gh = Math.ceil(PCH/gs)+1, H = new Float32Array(gw*gh);
+  for(let gy=0; gy<gh; gy++) for(let gx=0; gx<gw; gx++){
+    H[gy*gw+gx] = heightAt(i*PW + (gx*gs)/PPU, -PD*0.5 + (gy*gs)/PPU);
+  }
+  const STEP = 0.13, paths = [new Path2D(), new Path2D()];
+  for(let gy=0; gy<gh-1; gy++) for(let gx=0; gx<gw-1; gx++){
+    const a = H[gy*gw+gx], b = H[gy*gw+gx+1], c = H[(gy+1)*gw+gx+1], d = H[(gy+1)*gw+gx];
+    const lo = Math.min(a,b,c,d), hi = Math.max(a,b,c,d);
+    for(let n = Math.ceil(lo/STEP); n*STEP <= hi; n++){
+      const L = n*STEP, x0 = gx*gs, y0 = gy*gs;
+      const e = [];
+      if((a<L) !== (b<L)) e.push([x0 + gs*(L-a)/(b-a), y0]);
+      if((b<L) !== (c<L)) e.push([x0 + gs, y0 + gs*(L-b)/(c-b)]);
+      if((d<L) !== (c<L)) e.push([x0 + gs*(L-d)/(c-d), y0 + gs]);
+      if((a<L) !== (d<L)) e.push([x0, y0 + gs*(L-a)/(d-a)]);
+      const pth = paths[(n % 5 === 0) ? 1 : 0];
+      if(e.length >= 2){ pth.moveTo(e[0][0], e[0][1]); pth.lineTo(e[1][0], e[1][1]); }
+      if(e.length === 4){ pth.moveTo(e[2][0], e[2][1]); pth.lineTo(e[3][0], e[3][1]); }
+    }
+  }
+  x.lineCap = 'round'; x.lineJoin = 'round';
+  x.strokeStyle = hexA(COL.sepia, 0.36); x.lineWidth = 1.2; x.stroke(paths[0]);
+  x.strokeStyle = hexA(COL.sepia, 0.58); x.lineWidth = 2.0; x.stroke(paths[1]);
+}
+
+function tinyPine(x, px, py, s, col){
+  x.fillStyle = col;
+  x.beginPath(); x.moveTo(px, py - s*1.5); x.lineTo(px + s*0.62, py); x.lineTo(px - s*0.62, py); x.closePath(); x.fill();
+  x.fillRect(px - s*0.08, py, s*0.16, s*0.35);
+}
+function summit(x, px, py, label){
+  x.fillStyle = COL.ink;
+  x.beginPath(); x.moveTo(px, py-7); x.lineTo(px+6, py+4); x.lineTo(px-6, py+4); x.closePath(); x.fill();
+  x.font = '500 13px ' + MONO; x.fillStyle = hexA(COL.ink, 0.8);
+  tracked(x, label, px + 10, py + 5, 0.6, 'left');
+}
+function hutIcon(x, px, py, s){
+  x.fillStyle = COL.paperHi; x.strokeStyle = COL.ink; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(px - s, py + s*0.7); x.lineTo(px - s, py - s*0.15); x.lineTo(px, py - s); x.lineTo(px + s, py - s*0.15); x.lineTo(px + s, py + s*0.7); x.closePath();
+  x.fill(); x.stroke();
+  x.fillStyle = COL.red; x.fillRect(px - s*0.28, py + s*0.05, s*0.56, s*0.65);
+}
+function compassRose(x, cx, cy, r){
+  x.save(); x.translate(cx, cy);
+  x.strokeStyle = hexA(COL.ink, 0.55); x.lineWidth = 1.3;
+  x.beginPath(); x.arc(0,0,r*0.78,0,6.2832); x.stroke();
+  x.beginPath(); x.arc(0,0,r*0.70,0,6.2832); x.stroke();
+  for(let k=0;k<32;k++){
+    const a = k*Math.PI/16, l = (k%4===0) ? 0.10 : 0.05;
+    x.beginPath(); x.moveTo(Math.cos(a)*r*0.70, Math.sin(a)*r*0.70); x.lineTo(Math.cos(a)*r*(0.70-l), Math.sin(a)*r*(0.70-l)); x.stroke();
+  }
+  const point = (ang, len, wid, dark)=>{
+    const c = Math.cos(ang), s = Math.sin(ang), px = -s, py = c;
+    x.fillStyle = dark ? COL.ink : COL.paperHi;
+    x.beginPath(); x.moveTo(c*len, s*len); x.lineTo(px*wid, py*wid); x.lineTo(0,0); x.closePath(); x.fill();
+    x.fillStyle = dark ? COL.paperHi : COL.ink;
+    x.beginPath(); x.moveTo(c*len, s*len); x.lineTo(-px*wid, -py*wid); x.lineTo(0,0); x.closePath(); x.fill();
+    x.strokeStyle = COL.ink; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(c*len, s*len); x.lineTo(px*wid, py*wid); x.lineTo(-px*wid, -py*wid); x.closePath(); x.stroke();
+  };
+  point(-HALF_PI, r*1.0, r*0.17, true); point(HALF_PI, r*0.72, r*0.14, false);
+  point(0, r*0.72, r*0.14, false); point(PI, r*0.72, r*0.14, false);
+  x.fillStyle = COL.red; x.beginPath(); x.arc(0,0,r*0.07,0,6.2832); x.fill();
+  x.fillStyle = COL.ink; x.font = '500 ' + Math.round(r*0.34) + 'px ' + MONO; x.textAlign = 'center';
+  x.fillText('N', 0, -r*1.08);
+  x.textAlign = 'left';
+  x.restore();
+}
+
+function drawPanelPrint(i){
+  return function(x, w, h){
+    const tint = DAY_TINT[i];
+    x.fillStyle = COL.paper; x.fillRect(0,0,w,h);
+    // faded per-day wash, heavier at the back where the ground rises
+    const g = x.createLinearGradient(0,0,0,h);
+    g.addColorStop(0, hexA(tint, 0.34)); g.addColorStop(0.55, hexA(tint, 0.16)); g.addColorStop(1, hexA(tint, 0.05));
+    x.fillStyle = g; x.fillRect(0,0,w,h);
+    const rnd = rng(31 + i*17);
+    for(let k=0;k<7;k++){
+      const bx = rnd()*w, by = rnd()*h*0.8, br = 60 + rnd()*160;
+      const rg = x.createRadialGradient(bx,by,0,bx,by,br);
+      rg.addColorStop(0, hexA(tint, 0.10 + rnd()*0.08)); rg.addColorStop(1, hexA(tint, 0));
+      x.fillStyle = rg; x.fillRect(bx-br,by-br,br*2,br*2);
+    }
+    x.imageSmoothingEnabled = true;
+    x.drawImage(reliefCanvas(i, tint), 0, 0, w, h);
+
+    // water, printed under the cut pieces so the edge of a cut never shows bare paper
+    if(i === 0){
+      x.strokeStyle = hexA(COL.tarnDk, 0.55); x.lineWidth = 5; x.lineCap = 'round';
+      x.beginPath(); RIVER.forEach((p,k)=>{ const px = toPx(p[0]+PW*0.5), py = toPy(p[1]); k ? x.lineTo(px,py) : x.moveTo(px,py); }); x.stroke();
+    }
+    if(i === 2){
+      x.fillStyle = hexA(COL.tarn, 0.55);
+      x.beginPath(); lakeOutline(x, (lx,lz)=>[toPx(lx+PW*0.5), toPy(lz)], 1.06); x.fill();
+    }
+    contours(x, i);
+
+    // symbols
+    const X0 = i*PW;
+    if(i === 0 || i === 2 || i === 4){
+      const r2 = rng(90 + i);
+      for(let k=0;k<150;k++){
+        const lx = 0.3 + r2()*(PW-0.6), lz = -4.4 + r2()*8.6, H = heightAt(X0+lx, lz);
+        if(H < 0.75 || H > 1.7 || lz > 1.9) continue;
+        tinyPine(x, toPx(lx), toPy(lz), 5 + r2()*2.5, hexA(COL.pineDk, 0.55));
+      }
+    }
+    if(i === 1){
+      const r3 = rng(55);
+      x.fillStyle = hexA(COL.inkSoft, 0.42);
+      for(let k=0;k<420;k++){
+        const lx = r3()*PW, lz = -4.6 + r3()*6.4;
+        if(heightAt(X0+lx, lz) < 1.5) continue;
+        x.beginPath(); x.arc(toPx(lx), toPy(lz), 0.8 + r3()*1.3, 0, 6.2832); x.fill();
+      }
+    }
+    PEAKS.forEach(p=>{
+      if(p[0] < X0 + 0.5 || p[0] > X0 + PW - 1.4) return;
+      const hm = Math.round(1850 + p[2]*380 + (p[0]*37 % 60));
+      summit(x, toPx(p[0]-X0), toPy(Math.max(-4.45, p[1]+0.2)), String(hm).replace(/(\d)(\d{3})$/, '$1 $2'));
+    });
+    if(i === 0){
+      // church at the start, where the bus drops you
+      const cx = toPx(0.62), cy = toPy(3.98);
+      x.strokeStyle = COL.ink; x.lineWidth = 2.2;
+      x.beginPath(); x.arc(cx, cy, 6, 0, 6.2832); x.stroke();
+      x.beginPath(); x.moveTo(cx, cy-6); x.lineTo(cx, cy-17); x.moveTo(cx-5, cy-12.5); x.lineTo(cx+5, cy-12.5); x.stroke();
+    }
+    if(i === 4){
+      // bus stop at the bakery, the H in a ring
+      const end = ROUTE_CP[ROUTE_CP.length-1], cx = toPx(end[0] - X0 + 0.42), cy = toPy(end[1] + 0.62);
+      x.fillStyle = COL.paperHi; x.strokeStyle = COL.ink; x.lineWidth = 2;
+      x.beginPath(); x.arc(cx, cy, 9, 0, 6.2832); x.fill(); x.stroke();
+      x.fillStyle = COL.ink; x.font = '500 11px ' + MONO; x.textAlign = 'center'; x.fillText('H', cx, cy+4); x.textAlign = 'left';
+    }
+    // the hut at the end of each day, next to the crease it sleeps on
+    if(i < 4){
+      const e = ROUTE.at(ROUTE.cross[i+1]);
+      const hx = toPx(e.x - X0) - 18, hy = toPy(e.z) - 22;
+      hutIcon(x, hx, hy, 9);
+      x.font = '500 12px ' + MONO; x.fillStyle = hexA(COL.ink, 0.82);
+      tracked(x, DAYS[i].hut, hx - 14, hy - 16, 0.5, 'right');
+    }
+
+    // the planned line, faint: the red one prints over it as you go
+    x.save();
+    x.strokeStyle = hexA(COL.ink, 0.22); x.lineWidth = 2.2; x.setLineDash([2, 7]); x.lineCap = 'round';
+    x.beginPath();
+    let started = false;
+    ROUTE.pts.forEach(p=>{
+      const lx = p[0] - X0;
+      if(lx < -0.1 || lx > PW + 0.1){ started = false; return; }
+      const px = toPx(lx), py = toPy(p[1]);
+      if(!started){ x.moveTo(px,py); started = true; } else x.lineTo(px,py);
+    });
+    x.stroke(); x.restore();
+
+    // neat line and grid ticks, like the edge of a survey sheet
+    x.strokeStyle = hexA(COL.ink, 0.55); x.lineWidth = 1.4;
+    x.strokeRect(16, 16, w-32, h-32);
+    x.lineWidth = 1.2;
+    for(let t=16; t<=w-16; t+=48){
+      x.beginPath(); x.moveTo(t,16); x.lineTo(t, 16 + ((t/48)%2 ? 6 : 11)); x.stroke();
+      x.beginPath(); x.moveTo(t,h-16); x.lineTo(t, h-16 - ((t/48)%2 ? 6 : 11)); x.stroke();
+    }
+    for(let t=16; t<=h-16; t+=48){
+      x.beginPath(); x.moveTo(16,t); x.lineTo(16 + ((t/48)%2 ? 6 : 11), t); x.stroke();
+      x.beginPath(); x.moveTo(w-16,t); x.lineTo(w-16 - ((t/48)%2 ? 6 : 11), t); x.stroke();
+    }
+    x.fillStyle = hexA(COL.ink, 0.55); x.font = '400 11px ' + MONO;
+    tracked(x, (9 + i*0.07).toFixed(2) + ' E', 26, 34, 0.8, 'left');
+    tracked(x, i+1 + ' / 5', w - 26, 34, 1.2, 'right');
+
+    // the day label, printed along the front edge
+    x.fillStyle = COL.ink; x.font = '500 23px ' + MONO;
+    const lw = tracked(x, 'DAY ' + (i+1), 30, h - 50, 2.2, 'left');
+    x.fillStyle = hexA(COL.ink, 0.86); x.font = '400 23px ' + MONO;
+    tracked(x, DAYS[i].label + '  ' + DAYS[i].alt, 30 + lw + 22, h - 50, 1.6, 'left');
+    x.fillStyle = hexA(COL.ink, 0.55); x.font = '400 13px ' + MONO;
+    tracked(x, DAY_STATS[i], 30, h - 28, 1.4, 'left');
+    x.fillStyle = COL.red; x.fillRect(30, h - 82, 26, 3);
+
+    if(i === 0) compassRose(x, w - 78, h - 88, 44);
+    if(i === 4){
+      // a scale bar on the last panel, where people look for one
+      const sx = w - 250, sy = h - 44;
+      x.fillStyle = COL.ink; x.fillRect(sx, sy, 200, 4);
+      x.fillStyle = COL.paperHi; x.fillRect(sx + 50, sy + 0.8, 50, 2.4); x.fillRect(sx + 150, sy + 0.8, 50, 2.4);
+      x.fillStyle = hexA(COL.ink, 0.7); x.font = '400 11px ' + MONO;
+      tracked(x, '0', sx, sy - 7, 0, 'center'); tracked(x, '1', sx + 100, sy - 7, 0, 'center'); tracked(x, '2 KM', sx + 200, sy - 7, 0.6, 'center');
+    }
+
+    // crease shading on both long edges: a folded map never lies quite flat there
+    const cl = x.createLinearGradient(0,0,34,0);
+    cl.addColorStop(0, 'rgba(90,64,40,0.16)'); cl.addColorStop(1, 'rgba(90,64,40,0)');
+    x.fillStyle = cl; x.fillRect(0,0,34,h);
+    const cr = x.createLinearGradient(w,0,w-34,0);
+    cr.addColorStop(0, 'rgba(90,64,40,0.13)'); cr.addColorStop(1, 'rgba(90,64,40,0)');
+    x.fillStyle = cr; x.fillRect(w-34,0,34,h);
+    x.fillStyle = 'rgba(255,253,246,0.5)'; x.fillRect(1.5,0,1.4,h);
+  };
+}
+
+// a panel is machine cut: straight edges, only a whisper of deckle
+function panelShape(x,w,h){ x.fillRect(2, 2, w-4, h-4); }
+
+/* ---- the back of every panel: plain stock with the series line printed faint ---- */
+function drawPanelBack(x,w,h){
+  x.fillStyle = '#F3EBDD'; x.fillRect(0,0,w,h);
+  x.save(); x.translate(w*0.5, h*0.5); x.rotate(-0.5);
+  x.fillStyle = hexA(COL.ink, 0.07); x.font = '500 15px ' + MONO;
+  for(let r=-8;r<=8;r++) tracked(x, 'FIVE HUTS   THE VALMORA ROUND   1:25 000   FIVE HUTS   THE VALMORA ROUND', -520 + (r%2)*70, r*44, 2, 'left');
+  x.restore();
+  x.strokeStyle = hexA(COL.ink, 0.25); x.lineWidth = 1.2; x.strokeRect(12,12,w-24,h-24);
+}
+
+/* ---- the pocket cover. navy board, cream type, one red route ---- */
+function drawCover(x,w,h){
+  const g = x.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#33446A'); g.addColorStop(0.6, COL.ink); g.addColorStop(1,'#243149');
+  x.fillStyle = g; x.fillRect(0,0,w,h);
+  const s = w/540;
+  x.strokeStyle = 'rgba(246,239,226,0.55)'; x.lineWidth = 2*s; x.strokeRect(22*s,22*s,w-44*s,h-44*s);
+  x.lineWidth = 1*s; x.strokeRect(29*s,29*s,w-58*s,h-58*s);
+  x.fillStyle = 'rgba(246,239,226,0.8)'; x.font = '500 ' + Math.round(12*s) + 'px ' + MONO;
+  tracked(x, 'WALKING MAPS   NO. 5', 50*s, 70*s, 2.6*s, 'left');
+  tracked(x, 'EST. 2011', w - 50*s, 70*s, 2.6*s, 'right');
+  x.fillStyle = COL.paper; x.font = '600 ' + Math.round(86*s) + 'px ' + SERIF;
+  x.fillText('Five Huts.', 46*s, 176*s);
+  x.fillStyle = COL.butter; x.font = 'italic 500 ' + Math.round(44*s) + 'px ' + SERIF;
+  x.fillText('The Valmora Round', 48*s, 232*s);
+
+  // layered ranges, back to front, then the route over them
+  const bands = [['#56638A', 0.58, 0.10, 11], ['#6D7AA0', 0.64, 0.085, 5], ['#8795B6', 0.71, 0.07, 19]];
+  bands.forEach((b,k)=>{
+    const r = rng(b[3]);
+    x.fillStyle = b[0];
+    x.beginPath(); x.moveTo(0, h*0.86);
+    const N = 9 + k*2, pts = [];
+    for(let n=0;n<=N;n++){
+      const px = (n/N)*w, py = h*(b[1] - (n%2 ? b[2]*(0.6 + r()*0.6) : b[2]*0.1*r()));
+      pts.push([px,py]); x.lineTo(px, py);
+    }
+    x.lineTo(w, h*0.86); x.closePath(); x.fill();
+    // snow on the back range only
+    if(k === 0){
+      x.fillStyle = 'rgba(246,239,226,0.9)';
+      for(let n=1;n<pts.length-1;n+=2){
+        const p = pts[n], a = pts[n-1], c = pts[n+1];
+        x.beginPath(); x.moveTo(p[0], p[1]);
+        x.lineTo(p[0] + (c[0]-p[0])*0.3, p[1] + (c[1]-p[1])*0.3);
+        x.lineTo(p[0] + (c[0]-p[0])*0.12, p[1] + (c[1]-p[1])*0.22);
+        x.lineTo(p[0], p[1] + (c[1]-p[1])*0.3);
+        x.lineTo(p[0] - (p[0]-a[0])*0.14, p[1] + (a[1]-p[1])*0.2);
+        x.lineTo(p[0] - (p[0]-a[0])*0.3, p[1] + (a[1]-p[1])*0.3);
+        x.closePath(); x.fill();
+      }
+    }
+  });
+  x.fillStyle = '#A9B5CC'; x.fillRect(0, h*0.86, w, h*0.14);
+  x.strokeStyle = COL.red; x.lineWidth = 5*s; x.setLineDash([12*s, 9*s]); x.lineCap = 'round';
+  x.beginPath(); x.moveTo(40*s, h*0.83);
+  x.bezierCurveTo(w*0.25, h*0.70, w*0.36, h*0.79, w*0.5, h*0.66);
+  x.bezierCurveTo(w*0.64, h*0.55, w*0.75, h*0.72, w - 40*s, h*0.64);
+  x.stroke(); x.setLineDash([]);
+  [[0.22,0.745],[0.44,0.69],[0.62,0.60],[0.8,0.67]].forEach(p=>{
+    x.fillStyle = COL.paper; x.beginPath(); x.arc(w*p[0], h*p[1], 7*s, 0, 6.2832); x.fill();
+    x.fillStyle = COL.ink; x.beginPath(); x.arc(w*p[0], h*p[1], 3*s, 0, 6.2832); x.fill();
+  });
+  x.fillStyle = COL.ink; x.font = '500 ' + Math.round(34*s) + 'px ' + MONO;
+  tracked(x, '1:25 000', 50*s, h - 46*s, 2*s, 'left');
+  x.font = '400 ' + Math.round(12*s) + 'px ' + MONO; x.fillStyle = hexA(COL.ink, 0.85);
+  tracked(x, '5 DAYS  58 KM  4 HUTS', w - 50*s, h - 60*s, 1.8*s, 'right');
+  tracked(x, '1 BAKERY', w - 50*s, h - 42*s, 1.8*s, 'right');
+
+  // a sticker, slightly crooked, the only thing on the cover in ochre
+  x.save(); x.translate(w - 108*s, 318*s); x.rotate(0.22);
+  x.fillStyle = COL.ochre; x.beginPath(); x.arc(0,0,54*s,0,6.2832); x.fill();
+  x.strokeStyle = 'rgba(43,58,85,0.55)'; x.lineWidth = 1.4*s; x.beginPath(); x.arc(0,0,47*s,0,6.2832); x.stroke();
+  x.fillStyle = COL.ink; x.font = '600 ' + Math.round(19*s) + 'px ' + SERIF; x.textAlign = 'center';
+  x.fillText('hut', 0, -5*s); x.fillText('to hut', 0, 17*s);
+  x.textAlign = 'left'; x.restore();
+}
+
+/* ---- the inside of the cover, which lands on the table as a legend ---- */
+function drawLegend(x,w,h){
+  x.fillStyle = COL.paper; x.fillRect(0,0,w,h);
+  const s = w/540;
+  x.strokeStyle = hexA(COL.ink, 0.5); x.lineWidth = 1.4*s; x.strokeRect(22*s,22*s,w-44*s,h-44*s);
+  x.fillStyle = COL.ink; x.font = '600 ' + Math.round(40*s) + 'px ' + SERIF;
+  x.fillText('Legend', 50*s, 100*s);
+  x.font = '400 ' + Math.round(12*s) + 'px ' + MONO; x.fillStyle = hexA(COL.ink, 0.7);
+  tracked(x, 'READ THIS BEFORE THE MAP', 52*s, 128*s, 2*s, 'left');
+  const rows = ['Route, one day per panel', 'Summit, height in metres', 'Hut, bed and dinner', 'Church', 'Bus stop', 'Contour, every 20 m', 'Scree'];
+  x.font = '400 ' + Math.round(19*s) + 'px "Instrument Sans", sans-serif';
+  rows.forEach((r,k)=>{
+    const y = 190*s + k*56*s, ix = 80*s;
+    x.fillStyle = COL.ink; x.fillText(r, 140*s, y + 7*s);
+    x.save();
+    if(k === 0){ x.strokeStyle = COL.red; x.lineWidth = 5*s; x.setLineDash([9*s,6*s]); x.beginPath(); x.moveTo(ix-26*s,y); x.lineTo(ix+26*s,y); x.stroke(); }
+    if(k === 1){ x.beginPath(); x.moveTo(ix, y-11*s); x.lineTo(ix+10*s, y+7*s); x.lineTo(ix-10*s, y+7*s); x.closePath(); x.fill(); }
+    if(k === 2) hutIcon(x, ix, y, 13*s);
+    if(k === 3){ x.strokeStyle = COL.ink; x.lineWidth = 2.4*s; x.beginPath(); x.arc(ix, y+4*s, 8*s, 0, 6.2832); x.moveTo(ix, y-4*s); x.lineTo(ix, y-18*s); x.moveTo(ix-6*s, y-12*s); x.lineTo(ix+6*s, y-12*s); x.stroke(); }
+    if(k === 4){ x.strokeStyle = COL.ink; x.lineWidth = 2.4*s; x.beginPath(); x.arc(ix, y, 12*s, 0, 6.2832); x.stroke(); x.font = '500 ' + Math.round(14*s) + 'px ' + MONO; x.textAlign='center'; x.fillText('H', ix, y+5*s); x.textAlign='left'; }
+    if(k === 5){ x.strokeStyle = hexA(COL.sepia, 0.7); x.lineWidth = 2*s; x.beginPath(); x.moveTo(ix-26*s, y+4*s); x.bezierCurveTo(ix-10*s, y-10*s, ix+8*s, y+12*s, ix+26*s, y-4*s); x.stroke(); }
+    if(k === 6){ x.fillStyle = COL.inkSoft; for(let d=0; d<12; d++){ x.beginPath(); x.arc(ix - 22*s + (d*17%44)*s, y - 8*s + (d*7%16)*s, 1.8*s, 0, 6.2832); x.fill(); } }
+    x.restore();
+  });
+  x.fillStyle = COL.ink; x.font = 'italic 500 ' + Math.round(24*s) + 'px ' + SERIF;
+  x.fillText('Fold along the creases.', 50*s, h - 138*s);
+  x.fillText('It has opinions about', 50*s, h - 108*s);
+  x.fillText('the other way.', 50*s, h - 78*s);
+  x.fillStyle = COL.red; x.fillRect(50*s, h - 170*s, 36*s, 4*s);
+}
+
+/* ---- the table: warm oak, grain running along the map ---- */
+function drawTable(){
+  const S = 320, c = mk(S, S), x = c.getContext('2d');
+  x.fillStyle = COL.table; x.fillRect(0,0,S,S);
+  const r = rng(7);
+  for(let k=0;k<70;k++){
+    const y = r()*S, a = 0.02 + r()*0.05, th = 0.8 + r()*2.4;
+    x.strokeStyle = r() < 0.5 ? 'rgba(96,62,30,' + a + ')' : 'rgba(255,236,200,' + a*0.8 + ')';
+    x.lineWidth = th;
+    x.beginPath();
+    for(let px=0; px<=S; px+=10){
+      // periodic in x so the texture tiles along the grain
+      const py = y + Math.sin(px/S*6.2832*2 + k)*2 + Math.sin(px/S*6.2832*5 + k*1.7)*0.8;
+      px ? x.lineTo(px, py) : x.moveTo(px, py);
+    }
+    x.stroke();
+  }
+  return c;
+}
+
+/* ============================================================
+   4. the cut-outs. one geometry description per subject, run twice:
+      once in white for the alpha field, once in colour.
+   ============================================================ */
+function ridgeY(u,h,o){
+  return h - (o.base + o.amp*(
+      Math.sin(u*o.f1*6.2831853 + o.ph)*0.5 +
+      Math.sin(u*o.f2*6.2831853 + o.ph*1.7)*0.32 +
+      Math.sin(u*o.f3*6.2831853 + 2.1)*0.18))*h;
+}
+function ridgePath(x,w,h,P,o){
+  x.beginPath(); x.moveTo(-P, h+P);
+  for(let i=0;i<=140;i++){ const px = -P + (i/140)*(w+2*P); x.lineTo(px, ridgeY(px/w, h, o)); }
+  x.lineTo(w+P, h+P); x.closePath();
+}
+function tuftAt(x, px, py, r){
+  [[-1.02,0.34,0.70],[0,0,1],[1.02,0.34,0.70]].forEach(t=>{
+    const cx = px + t[0]*r, cy = py + t[1]*r, rr = r*t[2];
+    x.moveTo(cx + rr, cy); x.arc(cx, cy, rr, 0, 6.2832);
+  });
+}
+function hillOutline(x,w,h,P,o){
+  ridgePath(x,w,h,P,o);
+  const r = (o.tuftR||0)*h;
+  (o.tufts||[]).forEach(t=>tuftAt(x, t[0]*w, ridgeY(t[0],h,o) + r*0.46, r*t[1]));
+}
+function drawMeadowFlowers(x,w,h,o){
+  const rnd = rng(o.flowerSeed || 11), R = o.flowerR*h, spots = [];
+  for(let tries=0; spots.length < o.flowers && tries < 900; tries++){
+    const u = 0.035 + rnd()*0.93, px = u*w, top = ridgeY(u,h,o) + R*3.2, py = top + rnd()*(h*0.86 - top);
+    if(py > h*0.86 || py < top) continue;
+    if(spots.some(q=>Math.hypot(q[0]-px, q[1]-py) < R*5.0)) continue;
+    spots.push([px,py]);
+  }
+  spots.forEach((q,i)=>{
+    const c = o.flowerCols[i % o.flowerCols.length], rr = R*(0.82 + ((i*37)%10)*0.04), spin = i*0.7;
+    x.fillStyle = c;
+    for(let k=0;k<5;k++){
+      const a = spin + k*1.2566;
+      x.beginPath(); x.arc(q[0]+Math.cos(a)*rr*0.56, q[1]+Math.sin(a)*rr*0.56, rr*0.46, 0, 6.2832); x.fill();
+    }
+    x.fillStyle = (c === COL.butter) ? COL.ochreDk : COL.butter;
+    x.beginPath(); x.arc(q[0], q[1], rr*0.30, 0, 6.2832); x.fill();
+  });
+}
+function drawHills(mode,o){
+  return function(x,w,h,P){
+    hillOutline(x,w,h,P,o); x.fill();
+    if(mode !== 'col') return;
+    x.save(); hillOutline(x,w,h,P,o); x.clip();
+    const g = x.createLinearGradient(0, ridgeY(0.5,h,o) - h*o.amp, 0, h);
+    g.addColorStop(0, o.top); g.addColorStop(0.45, o.mid); g.addColorStop(1, o.foot);
+    x.fillStyle = g; x.fillRect(-P,-P,w+2*P,h+2*P);
+    if(o.tufts){
+      const r = o.tuftR*h; x.fillStyle = o.tuftCol; x.beginPath();
+      o.tufts.forEach(t=>tuftAt(x, t[0]*w, ridgeY(t[0],h,o) + r*0.46, r*t[1])); x.fill();
+    }
+    if(o.flowers) drawMeadowFlowers(x,w,h,o);
+    if(o.cobbles){
+      // a village street edge, a row of set stones along the foot
+      const r = rng(4);
+      for(let px=6; px<w; px+= h*0.13){
+        x.fillStyle = r() < 0.5 ? 'rgba(120,96,64,0.26)' : 'rgba(255,248,230,0.35)';
+        x.beginPath(); x.ellipse(px + r()*6, h*0.86 + r()*h*0.06, h*0.055, h*0.035, 0, 0, 6.2832); x.fill();
+      }
+    }
+    x.restore();
+  };
+}
+function tuftRun(n, seed){
+  const r = rng(seed), out = [];
+  for(let i=0;i<n;i++) out.push([(i+0.5)/n + (r()-0.5)*0.55/n, 0.78 + r()*0.44]);
+  return out;
+}
+
+/* ---- ridges: cut with a knife, not a wave. snow torn from white stock ---- */
+function ridgePts(w,h,o){
+  const r = rng(o.seed || 1), out = [], apex = [];
+  for(let i=0;i<o.pts.length-1;i++){
+    const a=o.pts[i], b=o.pts[i+1], n = o.sub || 5;
+    if(a[2]) apex.push(out.length);
+    for(let k=0;k<n;k++){
+      const t=k/n; let hf = a[1]+(b[1]-a[1])*t;
+      if(k>0) hf += (r()-0.5)*o.jag;
+      out.push([(a[0]+(b[0]-a[0])*t)*w, h - hf*h]);
+    }
+  }
+  const last=o.pts[o.pts.length-1]; if(last[2]) apex.push(out.length);
+  out.push([last[0]*w, h-last[1]*h]);
+  return { pts:out, apex };
+}
+function ridgeOutline(x,w,h,P,R){
+  x.beginPath(); x.moveTo(R.pts[0][0], h+P);
+  R.pts.forEach(p=>x.lineTo(p[0],p[1]));
+  x.lineTo(R.pts[R.pts.length-1][0], h+P); x.closePath();
+}
+function drawRidge(mode,o){
+  return function(x,w,h,P){
+    const R = ridgePts(w,h,o);
+    ridgeOutline(x,w,h,P,R); x.fill();
+    if(mode !== 'col') return;
+    x.save(); ridgeOutline(x,w,h,P,R); x.clip();
+    const g = x.createLinearGradient(0, h*(1-o.pts.reduce((m,p)=>Math.max(m,p[1]),0)), 0, h);
+    g.addColorStop(0, o.top); g.addColorStop(0.5, o.mid); g.addColorStop(1, o.foot);
+    x.fillStyle = g; x.fillRect(-P,-P,w+2*P,h+2*P);
+    // the shaded face of each peak: light comes from the upper left
+    R.apex.forEach(ai=>{
+      const a = R.pts[ai];
+      let vi = ai+1; while(vi < R.pts.length-1 && R.pts[vi+1][1] >= R.pts[vi][1] - 2) vi++;
+      x.fillStyle = o.shade;
+      x.beginPath(); x.moveTo(a[0], a[1]);
+      for(let k=ai+1;k<=vi;k++) x.lineTo(R.pts[k][0], R.pts[k][1]);
+      x.lineTo(R.pts[vi][0] - (R.pts[vi][0]-a[0])*0.25, h+2);
+      x.lineTo(a[0] + (R.pts[vi][0]-a[0])*0.18, h+2);
+      x.closePath(); x.fill();
+    });
+    if(o.scree){
+      const r = rng(o.seed*3 + 1);
+      for(let k=0;k<o.scree;k++){
+        const px = r()*w, py = h*0.25 + r()*h*0.75;
+        x.fillStyle = r() < 0.55 ? 'rgba(43,58,85,0.16)' : 'rgba(255,255,255,0.22)';
+        x.beginPath(); x.ellipse(px, py, 1.2 + r()*2.6, 0.9 + r()*1.4, r()*3, 0, 6.2832); x.fill();
+      }
+    }
+    if(o.snow){
+      const r = rng(o.seed*7 + 3);
+      R.apex.forEach(ai=>{
+        const m = o.snowSpan || 2, a = Math.max(0, ai-m), b = Math.min(R.pts.length-1, ai+m);
+        const top = R.pts.slice(a, b+1), depth = h*o.snow;
+        x.fillStyle = o.snowCol || '#FFFFFF';
+        x.beginPath(); x.moveTo(top[0][0], top[0][1] - 1);
+        top.forEach(p=>x.lineTo(p[0], p[1] - 2));
+        // the torn lower edge: long teeth, the way a snowfield breaks up on rock
+        const n = 9;
+        for(let k=n;k>=0;k--){
+          const px = top[0][0] + (top[top.length-1][0]-top[0][0])*(k/n);
+          let ry = 0; for(let q=1;q<top.length;q++){ if(px <= top[q][0]){ const f=(px-top[q-1][0])/Math.max(1,top[q][0]-top[q-1][0]); ry = top[q-1][1] + (top[q][1]-top[q-1][1])*f; break; } }
+          const edge = (k===0 || k===n) ? 0 : depth*(0.35 + r()*0.75)*(1 - Math.abs(k/n - 0.5)*0.9);
+          x.lineTo(px, ry + edge);
+        }
+        x.closePath(); x.fill();
+        // a blue-grey shadow half on the snow, same side as the rock shade
+        x.save(); x.clip();
+        x.fillStyle = o.snowShade || 'rgba(120,140,176,0.28)';
+        const ap = R.pts[ai]; x.fillRect(ap[0], ap[1] - 4, w, depth*2);
+        x.restore();
+      });
+    }
+    if(o.switchback){
+      // the zigzag path, pale cut paper laid on the scree
+      const s = o.switchback, pts = s.map(p=>[p[0]*w, p[1]*h]);
+      x.lineJoin = 'round'; x.lineCap = 'round';
+      x.strokeStyle = 'rgba(60,70,92,0.30)'; x.lineWidth = h*0.034;
+      x.beginPath(); pts.forEach((p,k)=> k ? x.lineTo(p[0]+1.5,p[1]+2) : x.moveTo(p[0]+1.5,p[1]+2)); x.stroke();
+      x.strokeStyle = '#F4EEE2'; x.lineWidth = h*0.026;
+      x.beginPath(); pts.forEach((p,k)=> k ? x.lineTo(p[0],p[1]) : x.moveTo(p[0],p[1])); x.stroke();
+    }
+    x.restore();
+  };
+}
+
+/* ---- trees ---- */
+// a larch is three or four scalloped tiers, each its own bite of green paper
+function larchPath(x, cx, base, H, W){
+  const n = 4;
+  for(let k=0;k<n;k++){
+    const ay = base - H + H*0.19*k, by = base - H + H*0.19*(k+1) + H*0.16, hw = W*(0.26 + 0.24*k);
+    const nS = 3 + k, sw = 2*hw/nS;
+    x.moveTo(cx, ay); x.lineTo(cx + hw, by);
+    for(let s=0;s<nS;s++){ const x0 = cx + hw - s*sw, x1 = x0 - sw; x.quadraticCurveTo((x0+x1)/2, by + sw*0.5, x1, by); }
+    x.lineTo(cx, ay);
+  }
+  x.rect(cx - W*0.05, base - H*0.12, W*0.10, H*0.14);
+}
+// a pine is a stack of zigzag teeth, darker and narrower than a larch
+function pinePath(x, cx, base, H, W){
+  const teeth = 6, top = base - H;
+  x.moveTo(cx, top);
+  for(let k=1;k<=teeth;k++){
+    const y = top + (H*0.86)*(k/teeth), hw = W*0.5*(k/teeth);
+    x.lineTo(cx + hw, y); if(k<teeth) x.lineTo(cx + hw*0.55, y - H*0.02);
+  }
+  for(let k=teeth;k>=1;k--){
+    const y = top + (H*0.86)*(k/teeth), hw = W*0.5*(k/teeth);
+    if(k<teeth) x.lineTo(cx - hw*0.55, y - H*0.02); x.lineTo(cx - hw, y);
+  }
+  x.closePath();
+  x.rect(cx - W*0.05, base - H*0.16, W*0.10, H*0.18);
+}
+function drawTreeBand(mode,o){
+  return function(x,w,h,P){
+    const trees = o.trees.map(t=>({ cx:t[0]*w, base:ridgeY(t[0],h,o.band) + h*0.03, H:t[1]*h, W:t[2]*h, c:t[3] }));
+    const outline = ()=>{
+      ridgePath(x,w,h,P,o.band);
+      trees.forEach(t=> (o.kind === 'pine' ? pinePath : larchPath)(x, t.cx, t.base, t.H, t.W));
+    };
+    outline(); x.fill();
+    if(mode !== 'col') return;
+    x.save(); outline(); x.clip();
+    // the band first, then every tree drawn back to front with its own lit half
+    const g = x.createLinearGradient(0, h*0.4, 0, h);
+    g.addColorStop(0, o.bandTop); g.addColorStop(1, o.bandFoot);
+    x.fillStyle = g; ridgePath(x,w,h,P,o.band); x.fill();
+    trees.slice().sort((a,b)=>b.H-a.H).forEach(t=>{
+      const cols = o.cols[t.c % o.cols.length];
+      x.fillStyle = COL.bark; x.fillRect(t.cx - t.W*0.05, t.base - t.H*0.12, t.W*0.10, t.H*0.14);
+      x.save(); x.translate(t.W*0.03, t.H*0.02); x.fillStyle = 'rgba(40,52,40,0.22)';
+      x.beginPath(); (o.kind === 'pine' ? pinePath : larchPath)(x, t.cx, t.base, t.H, t.W); x.fill(); x.restore();
+      x.fillStyle = cols[0];
+      x.beginPath(); (o.kind === 'pine' ? pinePath : larchPath)(x, t.cx, t.base, t.H, t.W); x.fill();
+      // lit left half, a second cut laid on top
+      x.save(); x.beginPath(); x.rect(t.cx - t.W, t.base - t.H - 4, t.W, t.H + 8); x.clip();
+      x.fillStyle = cols[1];
+      x.beginPath(); (o.kind === 'pine' ? pinePath : larchPath)(x, t.cx - t.W*0.02, t.base - t.H*0.01, t.H*0.97, t.W*0.94); x.fill();
+      x.restore();
+    });
+    x.restore();
+  };
+}
+
+/* ---- San Lucio: church, spire, four houses on a scrap of ground ---- */
+const VILLAGE = [
+  // cx, width, wall height, roof height, wall, roof
+  [0.14, 0.17, 0.26, 0.16, COL.paperHi, COL.slateDk],
+  [0.33, 0.15, 0.34, 0.15, '#EFE3CB', COL.ochreDk],
+  [0.74, 0.18, 0.30, 0.17, '#F3EAD8', COL.slateDp],
+  [0.90, 0.13, 0.24, 0.13, COL.paperHi, COL.ochreDk]
+];
+function villagePath(x,w,h,which){
+  const gy = h*0.93;
+  if(which === 'ground'){ x.moveTo(w*0.02, h*1.05); x.quadraticCurveTo(w*0.02, gy - h*0.03, w*0.12, gy - h*0.02); x.lineTo(w*0.88, gy - h*0.02); x.quadraticCurveTo(w*0.99, gy - h*0.03, w*0.99, h*1.05); x.closePath(); }
+  VILLAGE.forEach(v=>{
+    const cx = v[0]*w, hw = v[1]*w*0.5, wh = v[2]*h, rh = v[3]*h;
+    if(which === 'walls') x.rect(cx - hw, gy - wh, hw*2, wh + h*0.05);
+    if(which === 'roofs'){ x.moveTo(cx - hw*1.12, gy - wh + 1); x.lineTo(cx, gy - wh - rh); x.lineTo(cx + hw*1.12, gy - wh + 1); x.closePath(); }
+  });
+  const tx = w*0.53, tw = w*0.085;
+  if(which === 'walls'){ x.rect(w*0.42, gy - h*0.30, w*0.16, h*0.35); x.rect(tx - tw*0.5, gy - h*0.56, tw, h*0.62); }
+  if(which === 'roofs'){
+    x.moveTo(w*0.405, gy - h*0.30 + 1); x.lineTo(w*0.47, gy - h*0.42); x.lineTo(w*0.535, gy - h*0.30 + 1); x.closePath();
+    x.moveTo(tx - tw*0.62, gy - h*0.555); x.lineTo(tx, gy - h*0.86); x.lineTo(tx + tw*0.62, gy - h*0.555); x.closePath();
+  }
+  if(which === 'cross'){ x.rect(tx - w*0.005, gy - h*0.97, w*0.01, h*0.12); x.rect(tx - w*0.018, gy - h*0.94, w*0.036, h*0.018); }
+}
+function drawVillage(mode){
+  return function(x,w,h,P){
+    if(mode === 'shape'){
+      ['ground','walls','roofs','cross'].forEach(k=>{ x.beginPath(); villagePath(x,w,h,k); x.fill(); });
+      return;
+    }
+    x.fillStyle = COL.sageDk; x.beginPath(); villagePath(x,w,h,'ground'); x.fill();
+    const gy = h*0.93;
+    VILLAGE.forEach((v,i)=>{
+      const cx = v[0]*w, hw = v[1]*w*0.5, wh = v[2]*h, rh = v[3]*h;
+      x.fillStyle = v[4]; x.fillRect(cx - hw, gy - wh, hw*2, wh + h*0.05);
+      x.fillStyle = 'rgba(120,90,60,0.14)'; x.fillRect(cx + hw*0.2, gy - wh, hw*0.8, wh);
+      x.fillStyle = v[5]; x.beginPath(); x.moveTo(cx - hw*1.12, gy - wh + 1); x.lineTo(cx, gy - wh - rh); x.lineTo(cx + hw*1.12, gy - wh + 1); x.closePath(); x.fill();
+      x.fillStyle = 'rgba(255,255,255,0.18)'; x.beginPath(); x.moveTo(cx - hw*1.12, gy - wh + 1); x.lineTo(cx, gy - wh - rh); x.lineTo(cx, gy - wh + 1); x.closePath(); x.fill();
+      x.fillStyle = COL.ink;
+      const ww = hw*0.36, wy = gy - wh*0.72;
+      x.fillRect(cx - hw*0.62, wy, ww, wh*0.2); x.fillRect(cx + hw*0.26, wy, ww, wh*0.2);
+      if(i % 2 === 0) x.fillRect(cx - hw*0.14, gy - wh*0.34, hw*0.28, wh*0.34);
+      else { x.fillRect(cx - hw*0.62, gy - wh*0.36, ww, wh*0.2); x.fillRect(cx + hw*0.26, gy - wh*0.36, ww, wh*0.2); }
+    });
+    // the church: nave, then the tower, then the spire and its clock
+    x.fillStyle = '#F7F0E2'; x.fillRect(w*0.42, gy - h*0.30, w*0.16, h*0.35);
+    x.fillStyle = COL.slateDk; x.beginPath(); x.moveTo(w*0.405, gy - h*0.30 + 1); x.lineTo(w*0.47, gy - h*0.42); x.lineTo(w*0.535, gy - h*0.30 + 1); x.closePath(); x.fill();
+    const tx = w*0.53, tw = w*0.085;
+    x.fillStyle = COL.paperHi; x.fillRect(tx - tw*0.5, gy - h*0.56, tw, h*0.62);
+    x.fillStyle = 'rgba(120,90,60,0.14)'; x.fillRect(tx, gy - h*0.56, tw*0.5, h*0.62);
+    x.fillStyle = COL.slateDp; x.beginPath(); x.moveTo(tx - tw*0.62, gy - h*0.555); x.lineTo(tx, gy - h*0.86); x.lineTo(tx + tw*0.62, gy - h*0.555); x.closePath(); x.fill();
+    x.fillStyle = 'rgba(255,255,255,0.2)'; x.beginPath(); x.moveTo(tx - tw*0.62, gy - h*0.555); x.lineTo(tx, gy - h*0.86); x.lineTo(tx, gy - h*0.555); x.closePath(); x.fill();
+    x.fillStyle = COL.ochre; x.beginPath(); villagePath(x,w,h,'cross'); x.fill();
+    x.fillStyle = COL.ink; x.beginPath(); x.arc(tx, gy - h*0.47, tw*0.30, 0, 6.2832); x.fill();
+    x.fillStyle = COL.butter; x.beginPath(); x.arc(tx, gy - h*0.47, tw*0.23, 0, 6.2832); x.fill();
+    x.strokeStyle = COL.ink; x.lineWidth = Math.max(1.5, w*0.004);
+    x.beginPath(); x.moveTo(tx, gy - h*0.47); x.lineTo(tx, gy - h*0.505); x.moveTo(tx, gy - h*0.47); x.lineTo(tx + tw*0.14, gy - h*0.46); x.stroke();
+    x.fillStyle = COL.ink; x.beginPath(); x.moveTo(w*0.455, gy + h*0.05); x.lineTo(w*0.455, gy - h*0.1); x.quadraticCurveTo(w*0.475, gy - h*0.15, w*0.495, gy - h*0.1); x.lineTo(w*0.495, gy + h*0.05); x.closePath(); x.fill();
+    x.fillRect(tx - tw*0.14, gy - h*0.34, tw*0.28, h*0.07);
+  };
+}
+
+/* ---- clouds on struts, from the theatre ---- */
+function paperStrut(x, cx, top, h, P, sw, pal){
+  const footW = sw*3.2, footH = sw*1.8, bottom = h + P;
+  const foot = ()=>{
+    x.beginPath();
+    x.moveTo(cx - footW*0.5, bottom); x.lineTo(cx - sw*0.5, h - footH);
+    x.lineTo(cx + sw*0.5, h - footH); x.lineTo(cx + footW*0.5, bottom); x.closePath();
+  };
+  if(!pal){ x.fillRect(cx - sw*0.5, top, sw, bottom - top); foot(); x.fill(); return; }
+  x.fillStyle = pal.body; x.fillRect(cx - sw*0.5, top, sw, h - top + 2);
+  x.fillStyle = pal.hi;   x.fillRect(cx - sw*0.5, top, Math.max(1.5, sw*0.24), h - top + 2);
+  x.fillStyle = pal.foot; foot(); x.fill();
+  x.fillStyle = pal.hi;   x.fillRect(cx - footW*0.34, h - footH*0.40, footW*0.68, Math.max(1, sw*0.12));
+}
+const STRUT_CLOUD = { body:'#E4DACA', hi:'#FFFFFF', foot:'#D6C8B1' };
+const STRUT_MOON  = { body:'#F2BC45', hi:'#FFE7A0', foot:'#E2A734' };
+const STRUT_STAR  = { body:'#D8C58A', hi:'#F6E9B8', foot:'#BFAA6A' };
+const CLOUD_PARTS = [[0,0,1],[-0.78,0.22,0.66],[0.80,0.26,0.62],[-0.34,-0.30,0.72],[0.40,-0.24,0.70],[1.35,0.40,0.40],[-1.30,0.42,0.38]];
+function cloudPuffs(x,c){
+  CLOUD_PARTS.forEach(p=>{ x.beginPath(); x.arc(c.cx + p[0]*c.r, c.cy + p[1]*c.r, c.r*p[2], 0, 6.2832); x.fill(); });
+  x.beginPath(); x.rect(c.cx - c.r*1.5, c.cy, c.r*3.0, c.r*0.62); x.fill();
+}
+// a cloud bank is wider than it is tall, so each one is stretched sideways
+// around its own centre. both passes get the same stretch, so the cut agrees.
+function drawClouds(mode,list,wireW){
+  return function(x,w,h,P){
+    const cs = list.map(c=>({ cx:c[0]*w, cy:c[1]*h, r:c[2]*h, sx:c[3] || 1 }));
+    const stretch = (c, fn)=>{ x.save(); x.translate(c.cx, c.cy); x.scale(c.sx, 1); x.translate(-c.cx, -c.cy); fn(); x.restore(); };
+    if(mode === 'shape'){ cs.forEach(c=>{ paperStrut(x, c.cx, c.cy, h, P, wireW, null); stretch(c, ()=>cloudPuffs(x,c)); }); return; }
+    cs.forEach(c=>paperStrut(x, c.cx, c.cy, h, 0, wireW, STRUT_CLOUD));
+    cs.forEach(c=>stretch(c, ()=>{
+      x.save(); x.beginPath();
+      CLOUD_PARTS.forEach(p=>{ x.moveTo(c.cx+p[0]*c.r+c.r*p[2], c.cy+p[1]*c.r); x.arc(c.cx+p[0]*c.r, c.cy+p[1]*c.r, c.r*p[2], 0, 6.2832); });
+      x.rect(c.cx - c.r*1.5, c.cy, c.r*3.0, c.r*0.62); x.clip();
+      const g = x.createLinearGradient(0, c.cy - c.r, 0, c.cy + c.r*0.75);
+      g.addColorStop(0,'#FFFFFF'); g.addColorStop(0.55,'#F8F5EE'); g.addColorStop(1,'#DCE2EA');
+      x.fillStyle = g; x.fillRect(c.cx - c.r*2, c.cy - c.r*2, c.r*4, c.r*4);
+      x.restore();
+      const inner = { cx:c.cx - c.r*0.16, cy:c.cy - c.r*0.22, r:c.r*0.62 };
+      x.fillStyle = 'rgba(110,130,160,0.20)'; cloudPuffs(x, { cx:inner.cx + c.r*0.035, cy:inner.cy + c.r*0.05, r:inner.r });
+      x.fillStyle = '#FFFFFF'; cloudPuffs(x, inner);
+    }));
+  };
+}
+
+/* ---- the cairn: five stones and the red and white blaze painted on one ---- */
+const CAIRN = [[0.50,0.90,0.40,0.10],[0.47,0.74,0.32,0.085],[0.53,0.60,0.27,0.075],[0.49,0.47,0.21,0.066],[0.52,0.36,0.14,0.055]];
+function drawCairn(mode){
+  return function(x,w,h,P){
+    const stones = ()=>CAIRN.forEach(s=>{ x.moveTo(s[0]*w + s[2]*w, s[1]*h); x.ellipse(s[0]*w, s[1]*h, s[2]*w, s[3]*h*1.18, 0, 0, 6.2832); });
+    if(mode === 'shape'){ x.beginPath(); stones(); x.rect(w*0.18, h*0.9, w*0.64, h*0.2); x.fill(); return; }
+    x.fillStyle = COL.stoneDk; x.fillRect(w*0.18, h*0.9, w*0.64, h*0.2);
+    CAIRN.forEach((s,i)=>{
+      const cx = s[0]*w, cy = s[1]*h, rx = s[2]*w, ry = s[3]*h*1.18;
+      x.fillStyle = i%2 ? '#A7A396' : '#C4BFB2'; x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, 6.2832); x.fill();
+      x.fillStyle = 'rgba(255,255,255,0.28)'; x.beginPath(); x.ellipse(cx - rx*0.25, cy - ry*0.3, rx*0.55, ry*0.45, 0, 0, 6.2832); x.fill();
+      x.fillStyle = 'rgba(40,50,70,0.16)'; x.beginPath(); x.ellipse(cx + rx*0.2, cy + ry*0.35, rx*0.8, ry*0.45, 0, 0, 6.2832); x.fill();
+    });
+    const s = CAIRN[1], bx = s[0]*w - s[2]*w*0.4, by = s[1]*h - s[3]*h*0.35, bw = s[2]*w*0.8, bh = s[3]*h*0.7;
+    x.fillStyle = COL.red; x.fillRect(bx, by, bw, bh);
+    x.fillStyle = COL.paperHi; x.fillRect(bx, by + bh*0.34, bw, bh*0.32);
+  };
+}
+
+/* ---- boulders along the front edge of a scene ---- */
+function drawBoulders(mode,o){
+  return function(x,w,h,P){
+    const r = rng(o.seed), rocks = [];
+    for(let px=0; px < w; ){
+      const rw = h*(0.35 + r()*0.55), k = [px + rw*0.5, h - h*(0.22 + r()*0.4), rw*0.62, h*(0.3 + r()*0.28)];
+      // faceted, not round: a rock is a few straight cuts with the knife
+      const n = 6 + Math.floor(r()*3), rot = r()*6.28;
+      k.poly = []; for(let q=0;q<n;q++){ const a = rot + q/n*6.2832, s = 0.78 + r()*0.3; k.poly.push([Math.cos(a)*s, Math.sin(a)*s]); }
+      rocks.push(k); px += rw*(0.7 + r()*0.5);
+    }
+    const rockPath = (k, sx, sy, dx, dy)=>{ k.poly.forEach((q,i)=>{ const X = k[0] + dx + q[0]*k[2]*sx, Y = k[1] + dy + q[1]*k[3]*sy; i ? x.lineTo(X,Y) : x.moveTo(X,Y); }); x.closePath(); };
+    const outline = ()=>{ x.beginPath(); x.rect(-P, h*0.72, w+2*P, h*0.28+P); rocks.forEach(k=>rockPath(k,1,1,0,0)); };
+    outline(); x.fill();
+    if(mode !== 'col') return;
+    x.save(); outline(); x.clip();
+    x.fillStyle = o.foot; x.fillRect(-P,-P,w+2*P,h+2*P);
+    rocks.forEach((k,i)=>{
+      x.fillStyle = i%3 ? o.rock : o.rock2; x.beginPath(); rockPath(k,1,1,0,0); x.fill();
+      // the lit facet, upper left, and a darker cut along the right
+      x.fillStyle = o.hi; x.beginPath(); rockPath(k,0.55,0.5,-k[2]*0.22,-k[3]*0.28); x.fill();
+      x.fillStyle = 'rgba(30,36,60,0.14)'; x.beginPath(); rockPath(k,0.5,0.7,k[2]*0.34,k[3]*0.12); x.fill();
+    });
+    if(o.grass){
+      x.strokeStyle = o.grass; x.lineWidth = Math.max(1.4, h*0.02); x.lineCap = 'round';
+      for(let k=0;k<60;k++){ const gx = r()*w, gy = h*(0.78 + r()*0.2); x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + (r()-0.5)*h*0.06, gy - h*(0.08 + r()*0.1)); x.stroke(); }
+    }
+    x.restore();
+  };
+}
+
+/* ---- flat pieces: the river, the tarn and its boat lie on the page ---- */
+const RIVER = [[-0.35,-1.35],[0.25,-0.55],[0.95,0.3],[0.75,1.15],[1.35,1.95],[1.05,2.75],[1.55,3.55],[1.35,4.2],[1.62,4.78]];
+function riverPath(x, map){
+  // left bank forward, right bank back, widening toward the front
+  const L = [], R = [];
+  for(let i=0;i<RIVER.length;i++){
+    const a = RIVER[Math.max(0,i-1)], b = RIVER[Math.min(RIVER.length-1,i+1)];
+    let dx = b[0]-a[0], dz = b[1]-a[1]; const l = Math.hypot(dx,dz)||1; dx/=l; dz/=l;
+    const hw = 0.10 + 0.13*(i/(RIVER.length-1));
+    L.push(map(RIVER[i][0] - dz*hw, RIVER[i][1] + dx*hw)); R.push(map(RIVER[i][0] + dz*hw, RIVER[i][1] - dx*hw));
+  }
+  x.beginPath(); x.moveTo(L[0][0], L[0][1]);
+  for(let i=1;i<L.length;i++){ const m = [(L[i-1][0]+L[i][0])/2, (L[i-1][1]+L[i][1])/2]; x.quadraticCurveTo(L[i-1][0], L[i-1][1], m[0], m[1]); }
+  x.lineTo(L[L.length-1][0], L[L.length-1][1]); x.lineTo(R[R.length-1][0], R[R.length-1][1]);
+  for(let i=R.length-2;i>=0;i--){ const m = [(R[i+1][0]+R[i][0])/2, (R[i+1][1]+R[i][1])/2]; x.quadraticCurveTo(R[i+1][0], R[i+1][1], m[0], m[1]); }
+  x.lineTo(R[0][0], R[0][1]); x.closePath();
+}
+function drawRiver(mode, b){
+  return function(x,w,h,P){
+    const map = (lx,lz)=>[(lx - b.x0)/(b.x1-b.x0)*w, (lz - b.z0)/(b.z1-b.z0)*h];
+    riverPath(x, map); x.fill();
+    if(mode !== 'col') return;
+    x.save(); riverPath(x, map); x.clip();
+    const g = x.createLinearGradient(0,0,0,h); g.addColorStop(0, COL.tarnDk); g.addColorStop(1, COL.tarn);
+    x.fillStyle = g; x.fillRect(0,0,w,h);
+    x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = Math.max(1.5, w*0.008); x.lineCap = 'round';
+    const r = rng(8);
+    for(let k=0;k<26;k++){ const p = RIVER[Math.floor(r()*(RIVER.length-1))], q = map(p[0] + (r()-0.5)*0.15, p[1] + r()*0.7); x.beginPath(); x.moveTo(q[0]-w*0.03, q[1]); x.lineTo(q[0]+w*0.03, q[1]); x.stroke(); }
+    x.restore();
+  };
+}
+const LAKE = { cx:0.0, cz:0.25, rx:2.55, rz:0.98 };
+function lakeOutline(x, map, k){
+  for(let i=0;i<=72;i++){
+    const t = i/72*6.2832, wob = 1 + 0.07*Math.sin(3*t + 1) + 0.045*Math.sin(5*t + 2.2) + 0.03*Math.sin(8*t);
+    const p = map(LAKE.cx + Math.cos(t)*LAKE.rx*wob*k, LAKE.cz + Math.sin(t)*LAKE.rz*wob*k);
+    i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]);
+  }
+  x.closePath();
+}
+function drawLake(mode, b){
+  return function(x,w,h,P){
+    const map = (lx,lz)=>[(lx - b.x0)/(b.x1-b.x0)*w, (lz - b.z0)/(b.z1-b.z0)*h];
+    x.beginPath(); lakeOutline(x, map, 1); x.fill();
+    if(mode !== 'col') return;
+    x.save(); x.beginPath(); lakeOutline(x, map, 1); x.clip();
+    const g = x.createLinearGradient(0,0,0,h); g.addColorStop(0, '#6FA5B9'); g.addColorStop(1, COL.tarnLt);
+    x.fillStyle = g; x.fillRect(0,0,w,h);
+    // the peak, printed upside down on the water. the far shore is the top edge
+    const top = map(0, LAKE.cz - LAKE.rz*0.92)[1];
+    x.fillStyle = 'rgba(70,110,140,0.55)';
+    x.beginPath(); x.moveTo(0, top);
+    [[0.0,0.10],[0.16,0.32],[0.27,0.20],[0.42,0.62],[0.55,0.34],[0.70,0.48],[0.84,0.18],[1.0,0.08]].forEach(p=>x.lineTo(p[0]*w, top + p[1]*h));
+    x.lineTo(w, top); x.closePath(); x.fill();
+    x.fillStyle = 'rgba(236,244,248,0.7)';
+    x.beginPath(); x.moveTo(0.36*w, top + 0.49*h); x.lineTo(0.42*w, top + 0.62*h); x.lineTo(0.48*w, top + 0.47*h); x.lineTo(0.45*w, top + 0.52*h); x.lineTo(0.42*w, top + 0.50*h); x.lineTo(0.39*w, top + 0.53*h); x.closePath(); x.fill();
+    x.strokeStyle = 'rgba(255,255,255,0.6)'; x.lineWidth = Math.max(1.4, h*0.008); x.lineCap = 'round';
+    const r = rng(12);
+    for(let k=0;k<22;k++){ const px = w*(0.12 + r()*0.76), py = h*(0.2 + r()*0.7), l = w*(0.02 + r()*0.05); x.beginPath(); x.moveTo(px, py); x.lineTo(px + l, py); x.stroke(); }
+    x.restore();
+    // a pale shore line cut just inside the edge
+    x.strokeStyle = 'rgba(255,253,244,0.8)'; x.lineWidth = Math.max(2, h*0.012);
+    x.beginPath(); lakeOutline(x, map, 0.965); x.stroke();
+  };
+}
+function drawBoat(mode){
+  return function(x,w,h,P){
+    const hull = ()=>{ x.beginPath(); x.moveTo(w*0.08, h*0.5); x.quadraticCurveTo(w*0.3, h*0.1, w*0.72, h*0.2); x.quadraticCurveTo(w*0.95, h*0.3, w*0.95, h*0.5); x.quadraticCurveTo(w*0.95, h*0.7, w*0.72, h*0.8); x.quadraticCurveTo(w*0.3, h*0.9, w*0.08, h*0.5); x.closePath(); };
+    const oars = ()=>{ x.rect(w*0.38, h*0.02, w*0.035, h*0.96); x.ellipse(w*0.395, h*0.05, w*0.03, h*0.07, 0, 0, 6.2832); x.ellipse(w*0.395, h*0.95, w*0.03, h*0.07, 0, 0, 6.2832); };
+    if(mode === 'shape'){ hull(); x.fill(); x.beginPath(); oars(); x.fill(); return; }
+    x.fillStyle = COL.bark; x.beginPath(); oars(); x.fill();
+    x.fillStyle = COL.ochreDk; hull(); x.fill();
+    x.fillStyle = COL.ochreLt; x.beginPath(); x.ellipse(w*0.53, h*0.5, w*0.33, h*0.22, 0, 0, 6.2832); x.fill();
+    x.fillStyle = COL.bark; x.fillRect(w*0.3, h*0.3, w*0.05, h*0.4); x.fillRect(w*0.62, h*0.3, w*0.05, h*0.4);
+  };
+}
+
+/* ---- dusk: stars on wires, the theatre's moon, the high hut ---- */
+function starPath(x, cx, cy, r){
+  for(let k=0;k<10;k++){
+    const a = -HALF_PI + k*Math.PI/5, rr = k%2 ? r*0.45 : r;
+    k ? x.lineTo(cx + Math.cos(a)*rr, cy + Math.sin(a)*rr) : x.moveTo(cx + Math.cos(a)*rr, cy + Math.sin(a)*rr);
+  }
+  x.closePath();
+}
+const STARS = [[0.08,0.30,0.050],[0.22,0.12,0.062],[0.37,0.36,0.040],[0.55,0.10,0.056],[0.70,0.27,0.046],[0.84,0.08,0.066],[0.95,0.33,0.038]];
+function drawStars(mode){
+  return function(x,w,h,P){
+    const wire = Math.max(2.5, w*0.0075);
+    if(mode === 'shape' || mode === 'glow'){
+      if(mode === 'glow'){ x.fillStyle = '#000'; x.fillRect(0,0,w,h); x.fillStyle = '#fff'; }
+      STARS.forEach(s=>{ if(mode === 'shape') paperStrut(x, s[0]*w, s[1]*h, h, P, wire, null); x.beginPath(); starPath(x, s[0]*w, s[1]*h, s[2]*h); x.fill(); });
+      return;
+    }
+    STARS.forEach(s=>paperStrut(x, s[0]*w, s[1]*h, h, 0, wire, STRUT_STAR));
+    STARS.forEach(s=>{
+      x.fillStyle = COL.butterDk; x.beginPath(); starPath(x, s[0]*w, s[1]*h, s[2]*h); x.fill();
+      x.fillStyle = COL.butter; x.beginPath(); starPath(x, s[0]*w - s[2]*h*0.06, s[1]*h - s[2]*h*0.06, s[2]*h*0.72); x.fill();
+      x.fillStyle = '#FFF4CC'; x.beginPath(); starPath(x, s[0]*w - s[2]*h*0.1, s[1]*h - s[2]*h*0.1, s[2]*h*0.3); x.fill();
+    });
+  };
+}
+function drawMoon(mode){
+  return function(x,w,h,P){
+    const cx = w*0.55, cy = h*0.22, r = Math.min(w*0.40, h*0.2);
+    const stickW = w*0.07;
+    if(mode === 'shape' || mode === 'glow'){
+      if(mode === 'glow'){ x.fillStyle = '#000'; x.fillRect(0,0,w,h); x.fillStyle = '#fff'; }
+      if(mode === 'shape') paperStrut(x, cx, cy, h, P, stickW, null);
+      x.beginPath(); x.arc(cx,cy,r,0,6.2832); x.fill();
+      x.fillStyle = '#000'; x.beginPath(); x.arc(cx + r*0.52, cy - r*0.16, r*0.86, 0, 6.2832); x.fill();
+      x.fillStyle = '#fff';
+      return;
+    }
+    paperStrut(x, cx, cy, h, 0, stickW, STRUT_MOON);
+    x.fillStyle = COL.butter; x.beginPath(); x.arc(cx,cy,r*1.02,0,6.2832); x.fill();
+    x.save(); x.beginPath(); x.arc(cx,cy,r*1.02,0,6.2832); x.clip();
+    const g = x.createLinearGradient(cx-r, cy-r, cx+r*0.6, cy+r);
+    g.addColorStop(0,'#FFE9A6'); g.addColorStop(0.6,COL.butter); g.addColorStop(1,COL.butterDk);
+    x.fillStyle = g; x.fillRect(cx-r*1.2, cy-r*1.2, r*2.4, r*2.4);
+    x.fillStyle = COL.butterDk; x.globalAlpha = 0.55;
+    [[-0.36,-0.52,0.09],[-0.80,0.30,0.07],[-0.30,0.47,0.06]].forEach(c=>{ x.beginPath(); x.arc(cx+c[0]*r, cy+c[1]*r, r*c[2], 0, 6.2832); x.fill(); });
+    x.globalAlpha = 1; x.restore();
+    // the sleepy eye and the blush, both on the lit part of the crescent
+    x.strokeStyle = COL.ink; x.lineWidth = Math.max(2, r*0.05); x.lineCap = 'round';
+    x.beginPath(); x.arc(cx - r*0.50, cy - r*0.09, r*0.13, Math.PI*0.12, Math.PI*0.88); x.stroke();
+    x.fillStyle = 'rgba(217,87,59,0.55)'; x.beginPath(); x.arc(cx - r*0.62, cy + r*0.20, r*0.10, 0, 6.2832); x.fill();
+  };
+}
+function sunPath(x, cx, cy, r){
+  const n = 12;
+  x.moveTo(cx + r*1.42, cy);
+  for(let k=0;k<n*2;k++){
+    const a = (k/(n*2))*6.2832, rr = k%2 ? r*1.02 : r*1.42;
+    x.lineTo(cx + Math.cos(a)*rr, cy + Math.sin(a)*rr);
+  }
+  x.closePath();
+}
+function drawSun(mode){
+  return function(x,w,h,P){
+    const cx = w*0.5, cy = h*0.24, r = Math.min(w*0.30, h*0.15), stickW = w*0.07;
+    if(mode === 'shape'){ paperStrut(x, cx, cy, h, P, stickW, null); x.beginPath(); sunPath(x, cx, cy, r); x.fill(); return; }
+    paperStrut(x, cx, cy, h, 0, stickW, STRUT_MOON);
+    x.fillStyle = COL.ochre; x.beginPath(); sunPath(x, cx, cy, r); x.fill();
+    const g = x.createRadialGradient(cx - r*0.3, cy - r*0.3, 0, cx, cy, r*1.05);
+    g.addColorStop(0, '#FFF0B8'); g.addColorStop(0.55, COL.butter); g.addColorStop(1, COL.butterDk);
+    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 6.2832); x.fill();
+    x.strokeStyle = 'rgba(200,146,62,0.55)'; x.lineWidth = Math.max(1.5, r*0.04);
+    x.beginPath(); x.arc(cx, cy, r*0.82, 0, 6.2832); x.stroke();
+  };
+}
+function hutPath(x,w,h,which){
+  const gy = h*0.94;
+  if(which === 'body') x.rect(w*0.20, gy - h*0.40, w*0.60, h*0.46);
+  if(which === 'roof'){ x.moveTo(w*0.13, gy - h*0.38); x.lineTo(w*0.50, gy - h*0.70); x.lineTo(w*0.87, gy - h*0.38); x.lineTo(w*0.87, gy - h*0.34); x.lineTo(w*0.13, gy - h*0.34); x.closePath(); }
+  if(which === 'chim') x.rect(w*0.64, gy - h*0.74, w*0.075, h*0.2);
+  if(which === 'smoke'){ [[0.68,0.14,0.045],[0.72,0.07,0.055],[0.66,0.20,0.035]].forEach(p=>{ x.moveTo(w*p[0] + h*p[2], h*p[1]); x.arc(w*p[0], h*p[1], h*p[2], 0, 6.2832); }); }
+  if(which === 'flag'){ x.rect(w*0.08, gy - h*0.62, w*0.014, h*0.68); x.moveTo(w*0.094, gy - h*0.62); x.lineTo(w*0.19, gy - h*0.58); x.lineTo(w*0.094, gy - h*0.54); x.closePath(); }
+  if(which === 'ground'){ x.rect(w*0.03, gy - h*0.02, w*0.94, h*0.12); }
+}
+function hutWindows(x,w,h){
+  const gy = h*0.94;
+  x.rect(w*0.27, gy - h*0.29, w*0.11, h*0.12);
+  x.rect(w*0.62, gy - h*0.29, w*0.11, h*0.12);
+  x.rect(w*0.465, gy - h*0.56, w*0.07, h*0.08);
+}
+function drawHut(mode){
+  return function(x,w,h,P){
+    if(mode === 'shape'){ ['smoke','chim','roof','body','flag','ground'].forEach(k=>{ x.beginPath(); hutPath(x,w,h,k); x.fill(); }); return; }
+    if(mode === 'glow'){
+      x.fillStyle = '#000'; x.fillRect(0,0,w,h); x.fillStyle = '#fff'; x.beginPath(); hutWindows(x,w,h); x.fill();
+      const gy = h*0.94; x.fillRect(w*0.455, gy - h*0.2, w*0.09, h*0.2);
+      return;
+    }
+    const gy = h*0.94;
+    x.fillStyle = '#6D6A86'; x.beginPath(); hutPath(x,w,h,'ground'); x.fill();
+    x.fillStyle = '#EEE9F2'; x.beginPath(); hutPath(x,w,h,'smoke'); x.fill();
+    x.fillStyle = '#8E8BA0'; x.beginPath(); hutPath(x,w,h,'chim'); x.fill();
+    // dry stone walls, every stone its own scrap
+    x.fillStyle = '#A9A5B4'; x.beginPath(); hutPath(x,w,h,'body'); x.fill();
+    x.save(); x.beginPath(); hutPath(x,w,h,'body'); x.clip();
+    const r = rng(21);
+    for(let yy = gy - h*0.40; yy < gy + h*0.06; yy += h*0.055){
+      for(let xx = w*0.2 - r()*w*0.05; xx < w*0.8; xx += w*(0.06 + r()*0.05)){
+        x.fillStyle = r() < 0.5 ? '#BDB9C6' : '#96929F';
+        x.beginPath(); x.ellipse(xx, yy + r()*h*0.01, w*(0.025 + r()*0.015), h*0.022, 0, 0, 6.2832); x.fill();
+      }
+    }
+    x.fillStyle = 'rgba(40,40,70,0.18)'; x.fillRect(w*0.5, gy - h*0.40, w*0.3, h*0.46);
+    x.restore();
+    x.fillStyle = COL.indigoDk; x.beginPath(); hutPath(x,w,h,'roof'); x.fill();
+    x.fillStyle = 'rgba(255,255,255,0.14)'; x.beginPath(); x.moveTo(w*0.13, gy - h*0.38); x.lineTo(w*0.50, gy - h*0.70); x.lineTo(w*0.50, gy - h*0.34); x.lineTo(w*0.13, gy - h*0.34); x.closePath(); x.fill();
+    // windows: butter panes, ink bars. they glow once the light goes
+    x.fillStyle = COL.ink; x.fillRect(w*0.26, gy - h*0.30, w*0.13, h*0.14); x.fillRect(w*0.61, gy - h*0.30, w*0.13, h*0.14);
+    x.fillStyle = COL.butter; x.beginPath(); hutWindows(x,w,h); x.fill();
+    x.fillStyle = COL.ink;
+    [[0.325,0.23],[0.675,0.23]].forEach(c=>{ x.fillRect(w*c[0] - w*0.004, gy - h*0.29, w*0.008, h*0.12); x.fillRect(w*(c[0]-0.055), gy - h*c[1] - h*0.004, w*0.11, h*0.008); });
+    x.fillStyle = '#5A3E36'; x.fillRect(w*0.455, gy - h*0.2, w*0.09, h*0.2);
+    x.fillStyle = COL.butter; x.fillRect(w*0.47, gy - h*0.18, w*0.06, h*0.07);
+    x.fillStyle = COL.paperHi; x.fillRect(w*0.40, gy - h*0.40 + h*0.035, w*0.2, h*0.05);
+    x.fillStyle = COL.ink; x.font = '500 ' + Math.round(h*0.032) + 'px ' + MONO; x.textAlign = 'center';
+    x.fillText('ALTA VEDRA 2731', w*0.5, gy - h*0.40 + h*0.072); x.textAlign = 'left';
+    x.fillStyle = '#E5DFD2'; x.beginPath(); x.rect(w*0.08, gy - h*0.62, w*0.014, h*0.68); x.fill();
+    x.fillStyle = COL.red; x.beginPath(); x.moveTo(w*0.094, gy - h*0.62); x.lineTo(w*0.19, gy - h*0.58); x.lineTo(w*0.094, gy - h*0.54); x.closePath(); x.fill();
+  };
+}
+
+/* ---- Sella: apricot orchards, the bakery, the bus stop ---- */
+function drawOrchard(mode,o){
+  return function(x,w,h,P){
+    const trees = [];
+    const r = rng(17);
+    for(let row=0; row<2; row++){
+      for(let k=0;k<8;k++){
+        const u = 0.06 + k*0.125 + row*0.06 + (r()-0.5)*0.02;
+        if(u > 0.97) continue;
+        const gy = ridgeY(u,h,o.band) + h*(0.10 + row*0.30), R = h*(0.13 - row*0.005);
+        trees.push({ cx:u*w, gy, R, row });
+      }
+    }
+    const outline = ()=>{
+      ridgePath(x,w,h,P,o.band);
+      trees.forEach(t=>{ x.moveTo(t.cx + t.R, t.gy - t.R*1.35); x.arc(t.cx, t.gy - t.R*1.35, t.R, 0, 6.2832); x.rect(t.cx - t.R*0.1, t.gy - t.R*0.6, t.R*0.2, t.R*0.7); });
+    };
+    outline(); x.fill();
+    if(mode !== 'col') return;
+    x.save(); outline(); x.clip();
+    const g = x.createLinearGradient(0, h*0.2, 0, h); g.addColorStop(0, '#CFD6A0'); g.addColorStop(1, '#AFC08A');
+    x.fillStyle = g; ridgePath(x,w,h,P,o.band); x.fill();
+    // mown stripes between the rows
+    x.strokeStyle = 'rgba(255,250,230,0.35)'; x.lineWidth = h*0.018;
+    for(let k=0;k<5;k++){ x.beginPath(); for(let u=0;u<=1.001;u+=0.05){ const px=u*w, py = ridgeY(u,h,o.band) + h*(0.2 + k*0.16); u ? x.lineTo(px,py) : x.moveTo(px,py); } x.stroke(); }
+    trees.forEach(t=>{
+      x.fillStyle = COL.bark; x.fillRect(t.cx - t.R*0.1, t.gy - t.R*0.6, t.R*0.2, t.R*0.7);
+      x.fillStyle = 'rgba(60,70,40,0.25)'; x.beginPath(); x.ellipse(t.cx + t.R*0.2, t.gy + t.R*0.08, t.R*0.8, t.R*0.18, 0, 0, 6.2832); x.fill();
+      x.fillStyle = COL.sageDk; x.beginPath(); x.arc(t.cx, t.gy - t.R*1.35, t.R, 0, 6.2832); x.fill();
+      x.fillStyle = COL.sage; x.beginPath(); x.arc(t.cx - t.R*0.2, t.gy - t.R*1.55, t.R*0.66, 0, 6.2832); x.fill();
+      for(let f=0; f<5; f++){
+        const a = f*1.4 + t.cx, rr = t.R*0.62;
+        x.fillStyle = COL.ochre; x.beginPath(); x.arc(t.cx + Math.cos(a)*rr, t.gy - t.R*1.35 + Math.sin(a)*rr*0.8, t.R*0.12, 0, 6.2832); x.fill();
+      }
+    });
+    x.restore();
+  };
+}
+function bakeryPath(x,w,h,which){
+  const gy = h*0.95;
+  if(which === 'body') x.rect(w*0.14, gy - h*0.56, w*0.72, h*0.62);
+  if(which === 'roof'){ x.moveTo(w*0.09, gy - h*0.54); x.lineTo(w*0.26, gy - h*0.76); x.lineTo(w*0.74, gy - h*0.76); x.lineTo(w*0.91, gy - h*0.54); x.closePath(); }
+  if(which === 'chim') x.rect(w*0.66, gy - h*0.86, w*0.07, h*0.14);
+  if(which === 'smoke'){ [[0.70,0.05,0.04],[0.66,0.1,0.03]].forEach(p=>{ x.moveTo(w*p[0] + h*p[2], h*p[1]); x.arc(w*p[0], h*p[1], h*p[2], 0, 6.2832); }); }
+  if(which === 'awning'){
+    x.moveTo(w*0.10, gy - h*0.34); x.lineTo(w*0.90, gy - h*0.34); x.lineTo(w*0.94, gy - h*0.22);
+    const n = 8, sw = w*0.84/n;
+    for(let k=0;k<n;k++){ const x0 = w*0.94 - k*sw*1.0 - (k===0?0:0), x1 = x0 - sw; x.quadraticCurveTo((x0+x1)/2, gy - h*0.22 + sw*0.55, x1, gy - h*0.22); }
+    x.closePath();
+  }
+  if(which === 'sign') x.rect(w*0.30, gy - h*0.53, w*0.40, h*0.12);
+}
+function drawBakery(mode){
+  return function(x,w,h,P){
+    if(mode === 'shape'){ ['smoke','chim','roof','body','awning','sign'].forEach(k=>{ x.beginPath(); bakeryPath(x,w,h,k); x.fill(); }); return; }
+    const gy = h*0.95;
+    x.fillStyle = '#F4EFE7'; x.beginPath(); bakeryPath(x,w,h,'smoke'); x.fill();
+    x.fillStyle = COL.ochreDk; x.beginPath(); bakeryPath(x,w,h,'chim'); x.fill();
+    x.fillStyle = '#F5E6C8'; x.beginPath(); bakeryPath(x,w,h,'body'); x.fill();
+    x.fillStyle = 'rgba(150,100,50,0.13)'; x.fillRect(w*0.55, gy - h*0.56, w*0.31, h*0.62);
+    x.fillStyle = '#B97F3C'; x.beginPath(); bakeryPath(x,w,h,'roof'); x.fill();
+    x.save(); x.beginPath(); bakeryPath(x,w,h,'roof'); x.clip();
+    x.strokeStyle = 'rgba(80,50,20,0.28)'; x.lineWidth = Math.max(1.2, h*0.006);
+    for(let yy = gy - h*0.74; yy < gy - h*0.54; yy += h*0.04){ x.beginPath(); x.moveTo(0, yy); x.lineTo(w, yy); x.stroke(); }
+    x.restore();
+    // shop window: loaves in butter light, a door with a bell
+    x.fillStyle = COL.ink; x.fillRect(w*0.19, gy - h*0.21, w*0.36, h*0.21);
+    x.fillStyle = COL.butter; x.fillRect(w*0.205, gy - h*0.195, w*0.33, h*0.18);
+    x.fillStyle = COL.ochreDk;
+    [[0.26,0.08],[0.34,0.07],[0.42,0.085],[0.49,0.07]].forEach(l=>{ x.beginPath(); x.ellipse(w*l[0], gy - h*l[1], w*0.03, h*0.025, 0, 0, 6.2832); x.fill(); });
+    x.fillStyle = COL.ink; x.fillRect(w*0.62, gy - h*0.24, w*0.14, h*0.24);
+    x.fillStyle = '#3F4F74'; x.fillRect(w*0.635, gy - h*0.225, w*0.11, h*0.09);
+    x.fillStyle = COL.ink; x.fillRect(w*0.24, gy - h*0.47, w*0.08, h*0.1); x.fillRect(w*0.68, gy - h*0.47, w*0.08, h*0.1);
+    x.fillStyle = COL.butter; x.fillRect(w*0.25, gy - h*0.46, w*0.06, h*0.08); x.fillRect(w*0.69, gy - h*0.46, w*0.06, h*0.08);
+    // the awning, red and cream: the route ends under it
+    x.save(); x.beginPath(); bakeryPath(x,w,h,'awning'); x.clip();
+    const n = 8, sw = w*0.84/n;
+    for(let k=0;k<=n+1;k++){ x.fillStyle = k%2 ? COL.paperHi : COL.red; x.fillRect(w*0.06 + k*sw, gy - h*0.36, sw, h*0.2); }
+    x.fillStyle = 'rgba(90,40,20,0.18)'; x.fillRect(0, gy - h*0.34, w, h*0.03);
+    x.restore();
+    x.fillStyle = COL.paperHi; x.beginPath(); bakeryPath(x,w,h,'sign'); x.fill();
+    x.strokeStyle = COL.ink; x.lineWidth = Math.max(1.5, h*0.007); x.strokeRect(w*0.31, gy - h*0.52, w*0.38, h*0.10);
+    x.fillStyle = COL.ink; x.font = 'italic 600 ' + Math.round(h*0.07) + 'px ' + SERIF; x.textAlign = 'center';
+    x.fillText('Forno Sella', w*0.5, gy - h*0.445); x.textAlign = 'left';
+  };
+}
+function drawBusStop(mode){
+  return function(x,w,h,P){
+    const cx = w*0.5, pole = w*0.08, sy = h*0.2, sr = w*0.36;
+    if(mode === 'shape'){
+      paperStrut(x, cx, sy, h, P, pole, null);
+      x.beginPath(); x.arc(cx, sy, sr, 0, 6.2832); x.fill();
+      x.fillRect(w*0.14, h*0.40, w*0.72, h*0.2);
+      return;
+    }
+    paperStrut(x, cx, sy, h, 0, pole, { body:'#4E5C7C', hi:'#7E8BA8', foot:'#3A4664' });
+    x.fillStyle = COL.ink; x.beginPath(); x.arc(cx, sy, sr, 0, 6.2832); x.fill();
+    x.strokeStyle = COL.butter; x.lineWidth = sr*0.12; x.beginPath(); x.arc(cx, sy, sr*0.8, 0, 6.2832); x.stroke();
+    x.fillStyle = COL.paperHi; x.font = '500 ' + Math.round(sr*0.62) + 'px ' + MONO; x.textAlign = 'center';
+    x.fillText('BUS', cx, sy + sr*0.22);
+    x.fillStyle = COL.paperHi; x.fillRect(w*0.14, h*0.40, w*0.72, h*0.2);
+    x.strokeStyle = COL.ink; x.lineWidth = Math.max(1.2, w*0.02); x.strokeRect(w*0.18, h*0.41, w*0.64, h*0.18);
+    x.fillStyle = COL.inkSoft; x.font = '500 ' + Math.round(h*0.034) + 'px ' + MONO;
+    x.fillText('FERMATA', cx, h*0.46);
+    x.fillStyle = COL.red; x.font = '500 ' + Math.round(h*0.07) + 'px ' + MONO;
+    x.fillText('16:10', cx, h*0.555);
+    x.textAlign = 'left';
+  };
+}
+
+/* ---- the hiker. one figure, walking right, stick out front, on a strut ---- */
+function hikerPath(x,w,h,which){
+  const s = w;
+  if(which === 'pack'){ x.moveTo(s*0.14, h*0.25); x.quadraticCurveTo(s*0.08, h*0.26, s*0.1, h*0.36); x.lineTo(s*0.14, h*0.52); x.lineTo(s*0.38, h*0.52); x.lineTo(s*0.4, h*0.25); x.closePath(); }
+  if(which === 'body'){ x.moveTo(s*0.34, h*0.22); x.lineTo(s*0.62, h*0.22); x.lineTo(s*0.64, h*0.52); x.lineTo(s*0.34, h*0.53); x.closePath(); }
+  if(which === 'head'){ x.moveTo(s*0.62, h*0.12); x.arc(s*0.52, h*0.12, s*0.1, 0, 6.2832); }
+  if(which === 'hat'){ x.rect(s*0.36, h*0.045, s*0.32, h*0.022); x.moveTo(s*0.42, h*0.05); x.quadraticCurveTo(s*0.52, h*-0.01, s*0.62, h*0.05); x.closePath(); }
+  if(which === 'legs'){
+    x.moveTo(s*0.40, h*0.51); x.lineTo(s*0.30, h*0.78); x.lineTo(s*0.40, h*0.79); x.lineTo(s*0.50, h*0.53); x.closePath();
+    x.moveTo(s*0.48, h*0.51); x.lineTo(s*0.66, h*0.78); x.lineTo(s*0.75, h*0.76); x.lineTo(s*0.60, h*0.51); x.closePath();
+  }
+  if(which === 'boots'){ x.rect(s*0.24, h*0.77, s*0.17, h*0.045); x.rect(s*0.64, h*0.75, s*0.18, h*0.045); }
+  if(which === 'stick'){ x.moveTo(s*0.86, h*0.26); x.lineTo(s*0.90, h*0.27); x.lineTo(s*0.96, h*0.80); x.lineTo(s*0.92, h*0.80); x.closePath(); }
+  if(which === 'arm'){ x.moveTo(s*0.55, h*0.25); x.lineTo(s*0.88, h*0.33); x.lineTo(s*0.87, h*0.38); x.lineTo(s*0.54, h*0.33); x.closePath(); }
+}
+function drawHiker(mode){
+  return function(x,w,h,P){
+    const parts = ['pack','body','head','hat','legs','boots','stick','arm'];
+    if(mode === 'shape'){
+      parts.forEach(k=>{ x.beginPath(); hikerPath(x,w,h,k); x.fill(); });
+      paperStrut(x, w*0.5, h*0.8, h, P, w*0.1, null);
+      x.fillRect(w*0.2, h*0.79, w*0.64, h*0.05);
+      return;
+    }
+    paperStrut(x, w*0.5, h*0.8, h, 0, w*0.1, { body:'#E6DCC8', hi:'#FFFFFF', foot:'#D8CBB2' });
+    x.fillStyle = '#E6DCC8'; x.fillRect(w*0.2, h*0.79, w*0.64, h*0.05);
+    const fill = (k,c)=>{ x.fillStyle = c; x.beginPath(); hikerPath(x,w,h,k); x.fill(); };
+    fill('stick', COL.bark); fill('legs', COL.ink); fill('boots', '#5A3E36');
+    fill('pack', COL.ochre); fill('body', COL.red); fill('arm', COL.redDk);
+    fill('head', '#F1D2B2'); fill('hat', COL.ink);
+    x.fillStyle = COL.ochreDk; x.fillRect(w*0.12, h*0.34, w*0.28, h*0.03);
+    x.fillStyle = COL.paperHi; x.beginPath(); x.arc(w*0.585, h*0.115, w*0.018, 0, 6.2832); x.fill();
+  };
+}
+
+/* ============================================================
+   5. the world: a table, a concertina of five panels in nested
+      hinge groups, a pocket cover, and a scene hinged on each panel.
+   ============================================================ */
+const QUEUE = [];                      // lazy build, a sheet or two a frame, in scroll order
+const E = 0.014;                       // half the gap between stacked panels when shut
+let dirty = true;
+if(IN) IN.setup({ mk, tracked, rng, KNOB, COL, MONO });
+
+const tableTex = tex(drawTable(), true);
+tableTex.wrapS = tableTex.wrapT = THREE.RepeatWrapping;
+tableTex.repeat.set(40, 20);
+const table = new THREE.Mesh(
+  new THREE.PlaneGeometry(520, 260),
+  new THREE.MeshStandardMaterial({ map:tableTex, color:0xffffff, roughness:0.86, metalness:0 })
+);
+table.rotation.x = -HALF_PI;
+table.position.set(18, -0.012, -40);
+table.receiveShadow = true;
+scene.add(table);
+
+const mapRoot = new THREE.Group();
+scene.add(mapRoot);
+
+/* ---- the concertina. pivot i sits on crease i. sign flips each crease,
+   so every other panel folds up and over and lands face down, which is
+   what makes a zig-zag and not a roll. ---- */
+const PIVOT = [], FRAME = [], PANEL = [];
+const backCanvas = colourCanvas(345, 460, '#F3EBDD', IN ? IN.back : drawPanelBack);
+const backShape = shapeCanvas(115, 153, panelShape, 1.2);
+let parentFrame = mapRoot;
+for(let i=0;i<NP;i++){
+  const s = i === 0 ? 0 : (i % 2 ? 1 : -1);
+  const pivot = new THREE.Group();
+  pivot.position.set(i === 0 ? 0 : PW, s*E, 0);
+  parentFrame.add(pivot);
+  const frame = new THREE.Group();
+  frame.position.y = -s*E;
+  pivot.add(frame);
+
+  // blank stock until the print queue reaches it. the interior's panel 1 prints at twice the size:
+  // the landing comes in close on the trailhead
+  const col = IN ? colourCanvas(Math.round(PCW*(i === 0 ? 2 : 1.5)), Math.round(PCH*(i === 0 ? 2 : 1.5)), COL.paper, null) : colourCanvas(PCW, PCH, COL.paper, null);
+  const paper = makePaper({
+    colour:col, shape:shapeCanvas(138, 184, panelShape, 1.4), aspect:PW/PD, seed:11.3 + i*3.7,
+    deckle:0.0022, fibre:0.06, rim:0.25, contact:0, warp:0.004, warpF:[0.4,0.35,0.3], side:THREE.FrontSide
+  });
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(PW, PD, 8, 10), paper.mat);
+  face.customDepthMaterial = paper.depth;
+  face.rotation.x = -HALF_PI; face.position.set(PW*0.5, 0, 0);
+  face.receiveShadow = true; face.castShadow = true;
+  frame.add(face);
+
+  const bp = makePaper({ colour:backCanvas, shape:backShape, aspect:PW/PD, seed:40 + i, deckle:0.0022, fibre:0.05, rim:0.2, contact:0, warp:0.004, side:THREE.FrontSide });
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(PW, PD, 4, 4), bp.mat);
+  back.customDepthMaterial = bp.depth;
+  back.rotation.x = HALF_PI; back.position.set(PW*0.5, -0.002, 0);
+  back.receiveShadow = true;
+  frame.add(back);
+
+  PIVOT.push({ g:pivot, s });
+  FRAME.push(frame);
+  PANEL.push({ i, col, map:paper.map, face, printed:false, landed:false });
+  parentFrame = frame;
+}
+function printPanel(i){
+  const P0 = PANEL[i];
+  if(P0.printed) return;
+  (IN ? IN.print(i) : drawPanelPrint(i))(P0.col.getContext('2d'), P0.col.width, P0.col.height);
+  P0.map.needsUpdate = true; P0.printed = true; dirty = true;
+}
+
+/* ---- the pocket cover, hinged on the left edge of day 1. it swings over
+   and lands on the table as the legend ---- */
+const COVER_H = 4*E + 0.012;           // pivot height: half the shut stack, so it lands flat
+const coverPivot = new THREE.Group();
+coverPivot.position.set(0, COVER_H, 0);
+FRAME[0].add(coverPivot);
+const COVER = { front:null, map:null, inside:null };  // the hero kit reprints the cover for V2
+{
+  const cw = 480, chh = 640;
+  const cp = makePaper({ colour:colourCanvas(cw, chh, COL.ink, drawCover), shape:shapeCanvas(135, 180, panelShape, 1.6),
+    aspect:PW/PD, seed:9.1, deckle:0.003, rim:0.3, contact:0, fibre:0.05, warp:0.01, warpF:[0.3,0.26,0.18], side:THREE.FrontSide });
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(PW, PD, 8, 10), cp.mat);
+  front.customDepthMaterial = cp.depth; front.castShadow = true; front.receiveShadow = true;
+  front.rotation.x = -HALF_PI; front.position.set(PW*0.5, COVER_H + 0.001, 0);
+  coverPivot.add(front);
+  COVER.front = front; COVER.map = cp.map;
+  const lp = makePaper({ colour:colourCanvas(cw, chh, COL.paper, IN ? IN.legend : drawLegend), shape:shapeCanvas(135, 180, panelShape, 1.6),
+    aspect:PW/PD, seed:5.7, deckle:0.003, rim:0.3, contact:0, fibre:0.06, warp:0.01, side:THREE.FrontSide });
+  const inside = new THREE.Mesh(new THREE.PlaneGeometry(PW, PD, 4, 4), lp.mat);
+  inside.customDepthMaterial = lp.depth; inside.receiveShadow = true;
+  // turned twice so the legend reads the right way up once the cover has flipped
+  inside.rotation.set(HALF_PI, 0, PI); inside.position.set(PW*0.5, COVER_H - 0.001, 0);
+  coverPivot.add(inside);
+  COVER.inside = inside;
+}
+
+/* ---- hinge angles for a given amount of open, 0 shut to 1 flat ---- */
+const FOLD = { M:0, u:[1,0,0,0,0], uc:0, zz:0 };
+function applyFold(M){
+  FOLD.M = M;
+  const uc  = smooth(seg(M, 0.00, 0.24));
+  const u12 = smooth(seg(M, 0.22, 0.60));
+  const u34 = smooth(seg(M, 0.58, 0.95));
+  const zz  = smooth(seg(M, 0.90, 1.00));
+  FOLD.uc = uc; FOLD.u = [1, u12, u12, u34, u34]; FOLD.zz = zz;
+  const Z = KNOB.ZIG;
+  // the odd creases lift the rest of the stack up and over like a gondola, which
+  // stays level because the next crease opens by exactly as much. a little flap
+  // on the way over keeps it from looking mechanical.
+  PIVOT[0].g.rotation.z = Z*zz;
+  PIVOT[1].g.rotation.z =  PI*(1-u12) - 2*Z*zz;
+  PIVOT[2].g.rotation.z = -PI*(1-u12) + 2*Z*zz + 0.20*Math.sin(PI*u12);
+  PIVOT[3].g.rotation.z =  PI*(1-u34) - 2*Z*zz;
+  PIVOT[4].g.rotation.z = -PI*(1-u34) + 2*Z*zz + 0.20*Math.sin(PI*u34);
+  coverPivot.rotation.z = (PI - Z*zz)*uc;
+  for(let i=0;i<NP;i++){
+    const a = i === 0 ? 1 : FOLD.u[i], b = i < NP-1 ? FOLD.u[i+1] : 1;
+    PANEL[i].landed = Math.min(a, b, i === 0 ? uc : 1) > 0.985;
+  }
+}
+
+/* ---- scenes ---- */
+const SCENES = [];                     // per panel: { i, group, sheets, flats, maxOff }
+for(let i=0;i<NP;i++){
+  const g = new THREE.Group();
+  g.position.set(PW*0.5, 0, 0);
+  FRAME[i].add(g);
+  SCENES.push({ i, group:g, sheets:[], flats:[], maxOff:0, F:0 });
+}
+
+const HILL = (o) => ({ kind:'hills', args:o });
+const SPEC = [
+  // day 1, the valley
+  { day:0, name:'farRidge', z:-1.30, x:0.0, w:6.7, h:3.2, ch:300, blur:6, deckle:0.0062, sway:0.003,
+    draw:drawRidge, args:{ seed:3, jag:0.05, sub:5, pts:[[-0.02,0.28],[0.12,0.60,1],[0.27,0.44],[0.43,0.80,1],[0.57,0.56],[0.71,0.72,1],[0.86,0.48],[1.02,0.34]],
+      top:'#B7C8B8', mid:'#A3B9A5', foot:'#8FA991', shade:'rgba(60,90,80,0.16)', snow:0.10, snowCol:'#FBFAF4' } },
+  { day:0, name:'larches', z:-0.50, x:0.0, w:6.6, h:2.3, ch:290, blur:5, deckle:0.0066, sway:0.006,
+    draw:drawTreeBand, args:{ kind:'larch', band:{ base:0.16, amp:0.08, f1:0.8, f2:1.9, f3:3.4, ph:1.2 }, bandTop:COL.sage, bandFoot:'#8DB07F',
+      cols:[['#6F9560','#90B47C'],['#7FA36E','#A1C28B'],['#C9A659','#E2C47C']],
+      trees:[[0.05,0.64,0.30,0],[0.13,0.84,0.36,1],[0.21,0.58,0.28,0],[0.30,0.76,0.34,2],[0.39,0.62,0.30,1],[0.62,0.70,0.32,0],[0.70,0.88,0.38,1],[0.78,0.60,0.28,2],[0.87,0.80,0.34,0],[0.95,0.62,0.30,1]] } },
+  { day:0, name:'village', z:0.35, x:-1.55, w:3.0, h:2.1, ch:330, blur:4.5, deckle:0.0055, sway:0.003, draw:drawVillage },
+  { day:0, name:'meadow', z:1.35, x:0.0, w:6.7, h:1.25, ch:170, blur:4, deckle:0.0075, sway:0.004,
+    ...HILL({ base:0.30, amp:0.20, f1:1.1, f2:2.4, f3:4.6, ph:0.8, top:'#BFD9AC', mid:COL.sage, foot:'#8FB27F',
+      tufts:tuftRun(14, 9), tuftR:0.07, tuftCol:'#CFE3BF', flowers:20, flowerR:0.05, flowerSeed:13, flowerCols:[COL.butter,'#FFFFFF','#B7C3E0'] }) },
+  { day:0, name:'river', flat:true, y:0.004, bounds:{ x0:-0.75, x1:2.15, z0:-1.6, z1:4.78 }, ch:480, blur:3, deckle:0.004, draw:drawRiver },
+
+  // day 2, the pass
+  { day:1, name:'passRidge', z:-1.30, x:0.0, w:6.8, h:3.4, ch:310, blur:6, deckle:0.0062, sway:0.003,
+    draw:drawRidge, args:{ seed:7, jag:0.07, sub:5, pts:[[-0.02,0.30],[0.10,0.62,1],[0.22,0.48],[0.33,0.90,1],[0.45,0.60],[0.52,0.52],[0.60,0.62],[0.72,0.95,1],[0.84,0.58],[0.93,0.70,1],[1.02,0.34]],
+      top:'#B2BFCC', mid:COL.slate, foot:'#8394A6', shade:'rgba(44,58,86,0.24)', scree:380, snow:0.20, snowSpan:3 } },
+  { day:1, name:'clouds', z:-0.75, x:0.0, w:6.4, h:2.6, ch:270, blur:3.2, deckle:0.0045, sway:0.012, drift:0.14,
+    kind:'clouds', args:{ list:[[0.17,0.50,0.11,1.9],[0.55,0.60,0.095,2.1],[0.85,0.46,0.115,1.8]], wire:5 } },
+  { day:1, name:'scree', z:0.10, x:0.0, w:6.6, h:2.0, ch:250, blur:5, deckle:0.0066, sway:0.004,
+    draw:drawRidge, args:{ seed:11, jag:0.05, sub:5, pts:[[-0.02,0.24],[0.15,0.48],[0.30,0.40],[0.48,0.66,1],[0.63,0.50],[0.80,0.58,1],[1.02,0.28]],
+      top:'#93A3B4', mid:'#7E90A3', foot:'#6C7E92', shade:'rgba(40,52,80,0.22)', scree:520,
+      switchback:[[0.30,1.02],[0.58,0.90],[0.36,0.78],[0.56,0.66],[0.42,0.55],[0.52,0.45],[0.475,0.36]] } },
+  { day:1, name:'cairn', z:0.90, x:2.05, w:0.9, h:1.2, ch:240, blur:3, deckle:0.005, sway:0.008, draw:drawCairn },
+  { day:1, name:'boulders', z:1.40, x:0.0, w:6.7, h:0.8, ch:120, blur:3, deckle:0.0075, sway:0.003,
+    kind:'boulders', args:{ seed:5, foot:'#8B9AAA', rock:'#A7B3C0', rock2:'#94A2B2', hi:'rgba(255,255,255,0.26)' } },
+
+  // day 3, the lake
+  { day:2, name:'peaks', z:-1.30, x:0.0, w:6.8, h:3.3, ch:305, blur:6, deckle:0.0062, sway:0.003,
+    draw:drawRidge, args:{ seed:19, jag:0.04, sub:5, pts:[[-0.02,0.24],[0.14,0.54,1],[0.26,0.44],[0.42,0.92,1],[0.58,0.52],[0.72,0.70,1],[0.86,0.46],[1.02,0.30]],
+      top:'#AFC7D2', mid:'#92B2C1', foot:'#7C9EAF', shade:'rgba(36,66,92,0.22)', snow:0.24, snowSpan:3 } },
+  { day:2, name:'pines', z:-0.92, x:0.0, w:6.6, h:1.7, ch:230, blur:4, deckle:0.0066, sway:0.005,
+    draw:drawTreeBand, args:{ kind:'pine', band:{ base:0.12, amp:0.05, f1:0.7, f2:1.6, f3:3.2, ph:2.2 }, bandTop:'#8FB29A', bandFoot:'#76987F',
+      cols:[[COL.pine,'#7A9C84'],[COL.pineDk,'#648872']],
+      trees:[[0.04,0.62,0.26,0],[0.10,0.84,0.30,1],[0.17,0.70,0.28,0],[0.24,0.94,0.32,1],[0.31,0.66,0.26,0],[0.72,0.74,0.28,1],[0.79,0.92,0.32,0],[0.86,0.64,0.26,1],[0.93,0.82,0.30,0]] } },
+  { day:2, name:'lake', flat:true, y:0.004, bounds:{ x0:-2.9, x1:2.9, z0:-0.85, z1:1.35 }, ch:300, blur:3, deckle:0.004, draw:drawLake },
+  { day:2, name:'boat', flat:true, y:0.011, bounds:null, fx:0.95, fz:0.55, fw:1.0, fh:0.5, rot:0.35, ch:120, blur:2, deckle:0.004, draw:drawBoat },
+  { day:2, name:'frontPines', z:1.45, x:2.35, w:2.0, h:1.9, ch:280, blur:4, deckle:0.006, sway:0.009,
+    draw:drawTreeBand, args:{ kind:'pine', band:{ base:0.05, amp:0.02, f1:0.5, f2:1.2, f3:2.2, ph:0.4 }, bandTop:'#7E9E87', bandFoot:'#6A8A73',
+      cols:[[COL.pineDk,'#6A8E77'],[COL.pine,'#80A28A']], trees:[[0.26,0.80,0.46,0],[0.56,0.96,0.52,1],[0.82,0.66,0.40,0]] } },
+
+  // day 4, the high hut at dusk
+  { day:3, name:'duskRidge', z:-1.40, x:0.0, w:6.8, h:3.1, ch:290, blur:6, deckle:0.0062, sway:0.003,
+    draw:drawRidge, args:{ seed:23, jag:0.06, sub:5, pts:[[-0.02,0.30],[0.12,0.60,1],[0.25,0.45],[0.38,0.84,1],[0.50,0.55],[0.64,0.72,1],[0.78,0.50],[0.90,0.64,1],[1.02,0.32]],
+      top:'#767CAC', mid:'#62689A', foot:'#51578A', shade:'rgba(20,20,52,0.26)', snow:0.18, snowCol:'#E6E4F3', snowShade:'rgba(90,90,150,0.30)' } },
+  { day:3, name:'stars', z:-1.10, x:0.0, w:6.4, h:3.3, ch:300, blur:2.6, deckle:0.004, sway:0.014, draw:drawStars, glow:0.55 },
+  { day:3, name:'moon', z:-0.75, x:-2.30, w:1.8, h:3.0, ch:360, blur:3.5, deckle:0.005, sway:0.010, draw:drawMoon, glow:0.35 },
+  { day:3, name:'hut', z:0.30, x:0.55, w:2.6, h:2.1, ch:360, blur:4, deckle:0.0055, sway:0.003, draw:drawHut, glow:1.25 },
+  { day:3, name:'rocks', z:1.35, x:0.0, w:6.7, h:0.85, ch:120, blur:3, deckle:0.0075, sway:0.003,
+    kind:'boulders', args:{ seed:9, foot:'#50568A', rock:'#686E9E', rock2:'#5B6192', hi:'rgba(255,255,255,0.14)', grass:'rgba(160,170,120,0.5)' } },
+
+  // day 5, down to Sella
+  { day:4, name:'sun', z:-1.55, x:-2.25, w:1.9, h:3.0, ch:330, blur:3.5, deckle:0.005, sway:0.010, draw:drawSun },
+  { day:4, name:'goldHills', z:-1.30, x:0.0, w:6.8, h:3.0, ch:275, blur:6, deckle:0.0066, sway:0.003,
+    ...HILL({ base:0.52, amp:0.20, f1:0.9, f2:2.1, f3:3.9, ph:2.0, top:'#F7E9C4', mid:'#EFD497', foot:'#E2B76C',
+      tufts:tuftRun(12, 21), tuftR:0.035, tuftCol:'#FBF1D6' }) },
+  { day:4, name:'orchard', z:-0.60, x:0.0, w:6.6, h:2.0, ch:260, blur:4.5, deckle:0.0066, sway:0.005,
+    draw:drawOrchard, args:{ band:{ base:0.56, amp:0.10, f1:0.6, f2:1.4, f3:3.1, ph:0.3 } } },
+  { day:4, name:'bakery', z:0.35, x:1.35, w:2.9, h:2.3, ch:380, blur:4, deckle:0.0055, sway:0.003, draw:drawBakery },
+  { day:4, name:'busStop', z:1.00, x:-1.90, w:0.9, h:1.9, ch:300, blur:3, deckle:0.005, sway:0.012, draw:drawBusStop },
+  { day:4, name:'lane', z:1.45, x:0.0, w:6.7, h:0.8, ch:120, blur:3, deckle:0.0075, sway:0.003,
+    ...HILL({ base:0.36, amp:0.14, f1:1.2, f2:2.6, f3:5.0, ph:1.4, top:'#D7D49B', mid:'#C3C789', foot:'#AAB374',
+      tufts:tuftRun(16, 33), tuftR:0.08, tuftCol:'#E2DFAC', flowers:12, flowerR:0.06, flowerSeed:5, flowerCols:[COL.butter,'#FFFFFF'], cobbles:true }) }
+];
+
+function drawFns(s){
+  if(s.kind === 'hills') return [drawHills('shape', s.args), drawHills('col', s.args)];
+  if(s.kind === 'clouds') return [drawClouds('shape', s.args.list, s.args.wire), drawClouds('col', s.args.list, s.args.wire)];
+  if(s.kind === 'boulders') return [drawBoulders('shape', s.args), drawBoulders('col', s.args)];
+  if(s.flat && s.bounds) return [s.draw('shape', s.bounds), s.draw('col', s.bounds)];
+  return [s.draw('shape', s.args), s.draw('col', s.args)];
+}
+
+let sheetIdx = 0;
+function buildSheet(s){
+  const sc = SCENES[s.day], idx = sheetIdx++;
+  const [shapeFn, colFn] = drawFns(s);
+  let w, h;
+  if(s.flat){ w = s.bounds ? s.bounds.x1 - s.bounds.x0 : s.fw; h = s.bounds ? s.bounds.z1 - s.bounds.z0 : s.fh; }
+  else { w = s.w; h = s.h; }
+  let ch = s.ch, cw = Math.round(ch*(w/h)), blur = s.blur;
+  if(cw > 1400){ const k = 1400/cw; ch = Math.round(ch*k); cw = 1400; blur *= k; }
+  const shp = shapeCanvas(cw, ch, shapeFn, blur);
+  const col = colourCanvas(cw, ch, '#FFFFFF', colFn);
+  // glow maps are only light shapes, half resolution is plenty and softer is better
+  const glow = s.glow ? colourCanvas(Math.round(cw*0.5), Math.round(ch*0.5), '#000', s.draw('glow')) : null;
+  const { mat, depth, U } = makePaper({
+    colour:col, shape:shp, aspect:w/h, seed:idx*7.31 + 1.7, emissive:glow,
+    deckle:s.deckle, fibre:s.fibre, rim:s.flat ? 0.45 : 0.55, contact:s.flat ? 0 : 0.2, warp:s.flat ? 0.002 : 0.045,
+    warpF:[0.62 + (idx%9)*0.07, 0.83 - (idx%7)*0.03, 0.41 + (idx%5)*0.05]
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h, s.flat ? 6 : 24, s.flat ? 6 : 16), mat);
+  mesh.customDepthMaterial = depth;
+  mesh.receiveShadow = true;
+
+  if(s.flat){
+    mesh.rotation.x = -HALF_PI;
+    if(s.bounds) mesh.position.set((s.bounds.x0 + s.bounds.x1)*0.5, s.y, (s.bounds.z0 + s.bounds.z1)*0.5);
+    else { mesh.position.set(s.fx, s.y, s.fz); mesh.rotation.z = s.rot || 0; }
+    mat.polygonOffset = true; mat.polygonOffsetFactor = -1; mat.polygonOffsetUnits = -2;
+    sc.group.add(mesh);
+    sc.flats.push({ mesh, spec:s });
+    dirty = true;
+    return;
+  }
+  mesh.castShadow = true;
+  mesh.position.y = h*0.5;
+  const group = new THREE.Group();
+  group.position.set(s.x, 0, s.z);
+  group.rotation.x = -HALF_PI;
+  group.add(mesh);
+  sc.group.add(group);
+  const L = {
+    name:s.name, spec:s, sc, group, mesh, glowK:s.glow || 0,
+    sp:{ p:-HALF_PI, v:0 }, k:KNOB.SPRING_K, c:KNOB.SPRING_C,
+    off:0, sway:s.sway || 0, drift:s.drift || 0, phase:idx*1.37,
+    wob:{ a:0 }, wobStart:0,
+    probe:shp.getContext('2d', { willReadFrequently:true }), cw, ch,
+    z:s.z, x:s.x, w, h, U, warp0:0.045
+  };
+  L.wobAmp  = Math.min(0.092, 0.030 + L.sway*4.2);
+  L.wobFreq = 6.4 + L.sway*290;
+  mesh.userData.layer = L;
+  sc.sheets.push(L);
+  restack(sc);
+  // a sheet built late joins its scene at the scene's current state
+  settleSheet(L);
+  dirty = true;
+}
+
+/* ---- a shut pop-up is a stack: front pieces fold down on top of the ones
+   behind, so rank by hinge depth, back first. the front lifts first and the
+   back folds first, or a sheet would sweep through one still standing. ---- */
+function restack(sc){
+  const S = sc.sheets.slice().sort((a,b)=>a.z-b.z);
+  S.forEach((L,r)=>{
+    L.rank = r;
+    L.stackY = 0.016 + r*0.016;
+    L.off = (S.length - 1 - r)*0.075;
+    L.mesh.material.polygonOffset = true;
+    L.mesh.material.polygonOffsetFactor = -(r+2)*0.5;
+    L.mesh.material.polygonOffsetUnits = -(r+2);
+    L.k = KNOB.SPRING_K + r*8;
+  });
+  sc.stack = S;
+  sc.maxOff = S.reduce((m,L)=>Math.max(m,L.off), 0);
+}
+function foldPose(L){
+  const f = clamp01(-L.sp.p/HALF_PI);
+  L.group.position.y = f*f*L.stackY;
+  L.U.uWarp.value = L.warp0*(0.06 + 0.94*(1 - f));
+  return f;
+}
+function keepSheetsApart(sc){
+  const S = sc.stack || [];
+  for(let fi = S.length - 1; fi > 0; fi--){
+    const F = S[fi], tf = -F.sp.p;
+    if(tf <= 0) continue;
+    const reach = F.h*Math.sin(tf), fw = F.w*0.5;
+    for(let bi = fi - 1; bi >= 0; bi--){
+      const B = S[bi];
+      if(F.z - B.z >= reach) continue;
+      if(Math.abs(F.x - B.x) >= fw + B.w*0.5) continue;
+      if(B.sp.p > F.sp.p){ B.sp.p = F.sp.p; B.sp.v = Math.min(B.sp.v, F.sp.v); }
+    }
+  }
+}
+function sheetTarget(L){
+  const sc = L.sc;
+  const local = clamp01((sc.F - L.off)/Math.max(0.2, 1 - sc.maxOff));
+  const e = local*local*(3 - 2*local);
+  return -HALF_PI*(1 - e);
+}
+function settleSheet(L){
+  L.sp.p = sheetTarget(L); L.sp.v = 0;
+  L.group.rotation.x = L.sp.p; L.group.rotation.z = 0;
+  foldPose(L);
+}
+
+/* ---- the route: one dashed red line, cut per panel, drawn by arc length ---- */
+// uLift raises each vertex by its aYl: the interior's white card model drapes the route over its terraces
+const routeU = { uDraw:{ value:0 }, uDash:{ value:KNOB.DASH }, uLift:{ value:0 } };
+// u: the uniforms. the interior gives each panel its own uLift, so each stretch rises with its own model
+function routeMaterial(u){
+  u = u || routeU;
+  const m = new THREE.MeshStandardMaterial({ color:new THREE.Color(COL.red), roughness:0.9, metalness:0,
+    polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-4 });
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute float aS;\nattribute float aV;\nattribute float aYl;\nuniform float uLift;\nvarying float vS;\nvarying float vV;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvS = aS; vV = aV;\ntransformed.y += aYl*uLift;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float uDraw;\nuniform float uDash;\nvarying float vS;\nvarying float vV;\n' + NOISE)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        if(vS > uDraw) discard;
+        if(fract(vS/uDash) > 0.6) discard;
+        // printed ink bleeds a little into the paper, so the edge is never ruler straight
+        float _e = abs(vV) + (pNoise(vec2(vS*34.0, vV*2.0 + 3.0)) - 0.5)*0.55;
+        if(_e > 0.92) discard;
+        diffuseColor.rgb *= 0.9 + 0.14*pNoise(vec2(vS*80.0, vV*4.0));`);
+  };
+  m.customProgramCacheKey = () => 'route-ink';
+  return m;
+}
+const ROUTE_MAT = routeMaterial(), ROUTE_MESH = [];
+for(let i=0;i<NP;i++){
+  const X0 = i*PW, pos = [], aS = [], aV = [], aYl = [], idx = [];
+  const hw = KNOB.ROUTE_W*0.5;
+  let n = 0;
+  for(let k=0;k<ROUTE.pts.length;k++){
+    const p = ROUTE.pts[k], lx = p[0] - X0;
+    if(lx < 0.06 || lx > PW - 0.06) continue;
+    const a = ROUTE.pts[Math.max(0,k-1)], b = ROUTE.pts[Math.min(ROUTE.pts.length-1,k+1)];
+    let dx = b[0]-a[0], dz = b[1]-a[1]; const l = Math.hypot(dx,dz)||1; dx/=l; dz/=l;
+    pos.push(lx - dz*hw, 0.007, p[1] + dx*hw,  lx + dz*hw, 0.007, p[1] - dx*hw);
+    const yl = IN && IN.routeY ? IN.routeY(p[0], p[1]) : 0;
+    aS.push(ROUTE.s[k], ROUTE.s[k]); aV.push(-1, 1); aYl.push(yl, yl);
+    if(n > 0){ const o = (n-1)*2; idx.push(o, o+2, o+1, o+1, o+2, o+3); }
+    n++;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('aS', new THREE.Float32BufferAttribute(aS, 1));
+  geo.setAttribute('aV', new THREE.Float32BufferAttribute(aV, 1));
+  geo.setAttribute('aYl', new THREE.Float32BufferAttribute(aYl, 1));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, ROUTE_MAT);
+  m.receiveShadow = true;
+  FRAME[i].add(m);
+  ROUTE_MESH.push(m);
+}
+
+/* ---- the hiker: the one character. tiny, on a strut, walks the tip of the line ---- */
+const HIKER = (function(){
+  const h = KNOB.HIKER_H, w = h*0.68, ch = 220, cw = Math.round(ch*w/h);
+  const drawH = IN ? IN.hiker : drawHiker;
+  const shp = shapeCanvas(cw, ch, drawH('shape'), 2.2);
+  const col = colourCanvas(cw, ch, '#FFFFFF', drawH('col'));
+  // a dark ink figure: a light cut edge read as a pale fringe at the landing's close-up (V5 round 1), so it stays thin
+  const { mat, depth, U } = makePaper({ colour:col, shape:shp, aspect:w/h, seed:77.7, deckle:0.004, rim:IN ? 0.18 : 0.6, contact:0.1, warp:0.01 });
+  mat.polygonOffset = true; mat.polygonOffsetFactor = -4; mat.polygonOffsetUnits = -8;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h, 4, 6), mat);
+  mesh.customDepthMaterial = depth; mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.position.y = h*0.5;
+  const g = new THREE.Group(); g.add(mesh); scene.add(g);
+  const L = { name:'hiker', group:g, mesh, probe:shp.getContext('2d', { willReadFrequently:true }), cw, ch,
+    wob:{ a:0 }, wobStart:0, wobAmp:0.14, wobFreq:9, sway:0, isHiker:true, phase:0, lastS:0 };
+  mesh.userData.layer = L;
+  return L;
+})();
+
+/* ---- lights: a warm key that follows the camera's panel, soft fills ---- */
+const key = new THREE.DirectionalLight(0xFFF6E8, 3.0);
+key.castShadow = true;
+key.shadow.mapSize.set(KNOB.SHADOW, KNOB.SHADOW);
+key.shadow.camera.near = 1; key.shadow.camera.far = 70;
+key.shadow.bias = -0.0005; key.shadow.normalBias = 0.05;
+scene.add(key); scene.add(key.target);
+const hemi = new THREE.HemisphereLight(0xFFF8EE, 0xD9C2A0, 1.0);
+scene.add(hemi);
+// the cut-outs all face the camera, so without a frontal bounce they read
+// darker than the map they stand on
+const fill = new THREE.DirectionalLight(0xF2F0FF, 0.55);
+scene.add(fill); scene.add(fill.target);
+const hutLamp = new THREE.PointLight(0xFFC867, 0, 7, 2);
+hutLamp.position.set(PW*0.5 + 0.55, 0.9, 0.9);
+FRAME[3].add(hutLamp);
+
+/* ---- build order: day 1 now, everything else queued in the order you meet it ---- */
+printPanel(0);
+// the interior builds its own scene once the hero exists (IN.build below), V1's cut-outs stay out
+if(!IN) SPEC.filter(s=>s.day === 0).forEach(buildSheet);
+for(let i=1;i<NP;i++) QUEUE.push(()=>printPanel(i));
+if(!IN) for(let d=1; d<NP; d++) SPEC.filter(s=>s.day === d).forEach(s=>QUEUE.push(()=>buildSheet(s)));
+// at least one job a frame, then keep going while there is time left in it.
+// all=true empties the queue, for ?p= jumps that must show the settled page
+function pump(n, all){
+  const t0 = performance.now();
+  while(n-- > 0 && QUEUE.length){ QUEUE.shift()(); if(!all && performance.now() - t0 > 10) break; }
+}
+
+/* ============================================================
+   6. the rail. every pose is fitted from the bounds it has to show,
+      for whatever shape of window this is.
+   ============================================================ */
+const _fit = new THREE.PerspectiveCamera();
+const V3 = (x,y,z) => new THREE.Vector3(x,y,z);
+function fitPose(pts, T, elDeg, yawDeg, fov, box){
+  const el = elDeg*PI/180, yaw = yawDeg*PI/180;
+  const dir = V3(Math.sin(yaw)*Math.cos(el), Math.sin(el), Math.cos(yaw)*Math.cos(el));
+  _fit.fov = fov; _fit.aspect = camera.aspect; _fit.near = 0.1; _fit.far = 1000; _fit.updateProjectionMatrix();
+  const t = T.clone(), v = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
+  const bw = box[1]-box[0], bh = box[3]-box[2], bcx = (box[0]+box[1])*0.5, bcy = (box[2]+box[3])*0.5;
+  const tanV = Math.tan(fov*PI/360), tanH = tanV*camera.aspect;
+  let D = 22;
+  for(let it=0; it<18; it++){
+    _fit.position.copy(t).addScaledVector(dir, D); _fit.lookAt(t); _fit.updateMatrixWorld();
+    let x0=1e9, x1=-1e9, y0=1e9, y1=-1e9;
+    for(const p of pts){ v.copy(p).project(_fit); x0=Math.min(x0,v.x); x1=Math.max(x1,v.x); y0=Math.min(y0,v.y); y1=Math.max(y1,v.y); }
+    right.setFromMatrixColumn(_fit.matrixWorld, 0); up.setFromMatrixColumn(_fit.matrixWorld, 1);
+    t.addScaledVector(right, ((x0+x1)*0.5 - bcx)*tanH*D*0.9).addScaledVector(up, ((y0+y1)*0.5 - bcy)*tanV*D*0.9);
+    D *= Math.pow(Math.max((x1-x0)/bw, (y1-y0)/bh), 0.8);
+  }
+  return { pos:t.clone().addScaledVector(dir, D), tgt:t, fov };
+}
+
+const POSES = [];
+let NARROW = false;
+function computePoses(){
+  const a = camera.aspect;
+  NARROW = window.innerWidth <= 760 || a < 0.85;
+  const fov = NARROW ? 40 : KNOB.LENS;
+  POSES[0] = fitPose([V3(0,0.12,-4.8),V3(PW,0.12,-4.8),V3(0,0.12,4.8),V3(PW,0.12,4.8)], V3(PW*0.5,0.1,0),
+    NARROW ? 58 : 48, NARROW ? -4 : -7, fov, NARROW ? [-0.88,0.88,-0.9,-0.1] : [0.02,0.9,-0.78,0.62]);
+  for(let i=0;i<NP;i++){
+    const X0 = i*PW;
+    const pts = [V3(X0+0.3,0,4.65),V3(X0+PW-0.3,0,4.65),V3(X0+0.3,3.0,-1.3),V3(X0+PW-0.3,3.0,-1.3),V3(X0+PW*0.5,3.4,-1.3),V3(X0+0.3,0.3,-1.3),V3(X0+PW-0.3,0.3,-1.3)];
+    // phone, panel 1 with the cut-paper interior: where the hero lands, the whole board in frame and down to the caption
+    // (V5 round 1: cropped both sides, a dead band above the caption)
+    // desktop with the cut-paper interior: in close on the stretch being walked, so the panels either side are only a
+    // sliver at the edges (Sam, V5: "zoom into the segment so we see less on the left and right side")
+    const box = NARROW ? (IN && i === 0 ? [-0.8,1.84,-0.48,0.84] : [-1.14,1.14,-0.30,0.64]) : (IN ? [-0.62,1.06,-0.98,0.84] : [-0.40,0.96,-0.70,0.80]);
+    POSES[i+1] = fitPose(pts, V3(X0+PW*0.5, 1.0, 0.8), NARROW ? 27 : KNOB.ELEV, KNOB.YAW, fov, box);
+  }
+  const all = [];
+  for(let x=0;x<=NP*PW;x+=PW*0.5) all.push(V3(x,0,4.8), V3(x,0,-4.8), V3(x,3.2,-1.3));
+  POSES[6] = fitPose(all, V3(NP*PW*0.5,0.8,0), NARROW ? 40 : 30, NARROW ? -40 : -17, fov,
+    NARROW ? [-0.98,0.98,-0.66,0.50] : [-0.94,0.94,-0.70,0.42]);
+  POSES[7] = POSES[0];
+}
+
+const DAY0 = 0.09, DAYLEN = 0.146, FIN0 = 0.82, CLOSE0 = 0.94;
+function railAt(p){
+  if(p < 0.012) return 0;
+  if(p < 0.092) return ease3(seg(p, 0.012, 0.092));
+  if(p < FIN0){
+    const i = Math.min(4, Math.floor((p - DAY0)/DAYLEN)), t = (p - (DAY0 + i*DAYLEN))/DAYLEN;
+    // the interior keeps the camera on the beat until the hiker is nearly at its end
+    return 1 + i + (i < 4 ? ease3(seg(t, IN ? 0.9 : 0.62, 1.0)) : 0);
+  }
+  if(p < CLOSE0) return 5 + ease3(seg(p, FIN0, 0.875));
+  return 6 + ease3(seg(p, 0.943, 0.99));
+}
+function mapOpenAt(p){ return p < 0.5 ? seg(p, 0.014, 0.085) : 1 - seg(p, 0.955, 0.988); }
+function routeAt(p){
+  if(p < DAY0) return 0;
+  if(p >= FIN0) return ROUTE.L;
+  const i = Math.min(4, Math.floor((p - DAY0)/DAYLEN)), t = (p - (DAY0 + i*DAYLEN))/DAYLEN;
+  const a = ROUTE.cross[i], b = ROUTE.cross[i+1];
+  return a + (b - a)*(i < 4 ? t : Math.min(1, t/0.8));
+}
+function sceneF(i, p, R){
+  // the next scene starts to rise before the last one has finished lying down,
+  // so something is always moving while the dolly travels
+  let d = R - (i+1);
+  if(i === NP-1 && d > 0) d = 0;
+  let f = d < 0 ? 1 - smooth(seg(-d, 0.40, 0.66)) : 1 - smooth(seg(d, 0.26, 0.50));
+  // the finale: every scene up at once, rippling left to right
+  if(R >= NP) f = Math.max(f, smooth(seg(p, 0.848 + i*0.011, 0.864 + i*0.011)));
+  f *= 1 - smooth(seg(p, 0.934, 0.949));
+  // after a dive, day 1 lies flat at the landing and stands up as you scroll on
+  if(i === 0 && HK && HK.pLand) f *= Math.max(HK.stand0 ? HK.stand0() : 0, smooth(seg(p, HK.pLand + 0.004, HK.pLand + 0.024)));
+  return PANEL[i].landed ? f : 0;
+}
+
+const CAMS = { pos:new THREE.Vector3(), tgt:new THREE.Vector3(), fov:KNOB.LENS };
+const PLAY_INTRO = !DEBUG && !REDUCED && !HERO_ON;   // a hero option plays its own intro
+const INTRO = { v: PLAY_INTRO ? 0 : 1 }, PEEK = { v: 0 };
+function cameraAt(R){
+  const a = Math.max(0, Math.min(6, Math.floor(R))), f = Math.min(1, R - a);
+  const A = POSES[a], B = POSES[a+1];
+  CAMS.pos.lerpVectors(A.pos, B.pos, f);
+  CAMS.tgt.lerpVectors(A.tgt, B.tgt, f);
+  CAMS.fov = lerp(A.fov, B.fov, f);
+  if(a >= 1 && a <= 4){
+    // a small hop between panels, and the eye runs ahead of the dolly
+    const hop = Math.sin(PI*f);
+    CAMS.pos.y += hop*KNOB.RISE; CAMS.tgt.y += hop*KNOB.RISE*0.35;
+    CAMS.tgt.x += hop*KNOB.LEAD;
+  }
+}
+
+/* ============================================================
+   7. light: day, dusk on the high hut, gold on the way down
+   ============================================================ */
+const LIGHT = {
+  day:  { key:new THREE.Color('#FFF6E8'), ki:3.0,  sky:new THREE.Color('#FFF8EE'), gnd:new THREE.Color('#D9C2A0'), hi:1.0,  fi:0.55, bg:new THREE.Color(COL.table) },
+  dusk: { key:new THREE.Color('#A9AEEA'), ki:1.35, sky:new THREE.Color('#7074B0'), gnd:new THREE.Color('#302D4C'), hi:0.80, fi:0.24, bg:new THREE.Color('#403E64') },
+  gold: { key:new THREE.Color('#FFE2B4'), ki:3.2, sky:new THREE.Color('#FFF0D6'), gnd:new THREE.Color('#D8B07A'), hi:1.0,  fi:0.50, bg:new THREE.Color('#CFA26C') }
+};
+const _c = new THREE.Color(), _bg = new THREE.Color();
+let lastBgHex = '', shR = 0, DUSK = 0, GOLD = 0;
+const duskEl = document.getElementById('dusk'), goldEl = document.getElementById('gold');
+function applyLight(R){
+  // V1's dusk on day 4 and gold on day 5 belong to the Valmora Round, not to the interior's treks
+  DUSK = IN ? 0 : smooth(seg(R, 3.3, 3.85)) * (1 - smooth(seg(R, 4.25, 4.8)));
+  GOLD = IN ? 0 : smooth(seg(R, 4.35, 4.9)) * (1 - smooth(seg(R, 5.25, 5.8)));
+  const D = LIGHT.day, K = LIGHT.dusk, G = LIGHT.gold;
+  key.color.copy(D.key).lerp(K.key, DUSK).lerp(G.key, GOLD);
+  key.intensity = lerp(lerp(D.ki, K.ki, DUSK), G.ki, GOLD);
+  hemi.color.copy(D.sky).lerp(K.sky, DUSK).lerp(G.sky, GOLD);
+  hemi.groundColor.copy(D.gnd).lerp(K.gnd, DUSK).lerp(G.gnd, GOLD);
+  hemi.intensity = lerp(lerp(D.hi, K.hi, DUSK), G.hi, GOLD);
+  fill.intensity = lerp(lerp(D.fi, K.fi, DUSK), G.fi, GOLD);
+  _bg.copy(D.bg).lerp(K.bg, DUSK).lerp(G.bg, GOLD);
+  scene.background.copy(_bg); scene.fog.color.copy(_bg);
+  const hex = '#' + _bg.getHexString();
+  if(hex !== lastBgHex){ lastBgHex = hex; document.body.style.background = hex; document.documentElement.style.background = hex; }
+  duskEl.style.opacity = (DUSK*0.85).toFixed(3);
+  goldEl.style.opacity = (GOLD*0.7).toFixed(3);
+  const night = DUSK > 0.45;
+  if(night !== applyLight.night){ applyLight.night = night; document.body.classList.toggle('night', night); }
+  hutLamp.intensity = DUSK*6;
+  SCENES[3].sheets.forEach(L=>{ if(L.glowK) L.mesh.material.emissiveIntensity = DUSK*L.glowK; });
+
+  // the shadow frustum follows the camera's panel and grows for the wide shots
+  const dist = camera.position.distanceTo(CAMS.tgt);
+  const r = Math.max(6.5, Math.min(26, dist*0.62));
+  key.position.copy(CAMS.tgt).add(IN && IN.keyOff ? _off.copy(IN.keyOff) : _off.set(-9, 15, 8));
+  key.target.position.copy(CAMS.tgt);
+  if(Math.abs(r - shR) > 0.05){
+    shR = r; const sc = key.shadow.camera;
+    sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r; sc.updateProjectionMatrix();
+  }
+  fill.position.copy(CAMS.tgt).add(_off.set(3, 4, 16)); fill.target.position.copy(CAMS.tgt);
+  scene.fog.near = dist*1.8; scene.fog.far = dist*5.5;
+}
+const _off = new THREE.Vector3();
+
+/* ============================================================
+   8. the DOM: notebook cards, the elevation strip, finale, footer
+   ============================================================ */
+const CARDS = Array.from(document.querySelectorAll('.card'));
+const heroCopy = document.getElementById('heroCopy');
+const strip = document.getElementById('strip');
+const finaleLine = document.getElementById('finaleLine');
+const bookPanel = document.getElementById('bookPanel');
+const roAlt = document.getElementById('roAlt'), roKm = document.getElementById('roKm');
+const svg = document.getElementById('profile');
+let SVGW = 1000, mkEl = null, doneRect = null;
+const fmtAlt = a => String(Math.round(a)).replace(/(\d)(\d{3})$/, '$1 $2') + ' m';
+
+function buildProfile(){
+  SVGW = Math.max(200, Math.round(svg.getBoundingClientRect().width || 1000));
+  const H = Math.max(40, Math.round(svg.getBoundingClientRect().height || 50));
+  svg.setAttribute('viewBox', '0 0 ' + SVGW + ' ' + H);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  const X = km => (km/58)*SVGW, Y = alt => (H - 6) - ((alt - 1100)/1760)*(H - 16);
+  let d = '';
+  PROFILE.forEach((p,k)=>{ d += (k ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1); });
+  let ticks = '';
+  for(let i=0;i<NP;i++){
+    const x = X(KM0[i]);
+    if(i > 0) ticks += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="2" y2="' + (H-2) + '" stroke="rgba(43,58,85,0.28)" stroke-width="1" stroke-dasharray="2 3"/>';
+    ticks += '<text x="' + (x + 5).toFixed(1) + '" y="11" font-family="DM Mono, monospace" font-size="9.5" letter-spacing="1.2" fill="rgba(43,58,85,0.7)">D' + (i+1) + '</text>';
+  }
+  svg.innerHTML =
+    '<defs><clipPath id="done"><rect id="doneRect" x="0" y="-10" width="0" height="' + (H+20) + '"/></clipPath></defs>' +
+    ticks +
+    '<path d="' + d + 'L' + SVGW + ' ' + H + 'L0 ' + H + 'Z" fill="rgba(43,58,85,0.07)"/>' +
+    '<path d="' + d + '" fill="none" stroke="rgba(43,58,85,0.42)" stroke-width="1.2"/>' +
+    '<path d="' + d + '" fill="none" stroke="' + COL.red + '" stroke-width="2.4" stroke-dasharray="6 4" clip-path="url(#done)"/>' +
+    '<g id="mk"><line x1="0" x2="0" y1="0" y2="' + H + '" stroke="' + COL.red + '" stroke-width="1"/><circle cx="0" cy="0" r="4.5" fill="' + COL.red + '" stroke="#FBF7EE" stroke-width="2"/></g>';
+  mkEl = svg.querySelector('#mk'); doneRect = svg.querySelector('#doneRect');
+  svg._X = X; svg._Y = Y;
+}
+
+let activeCard = -2, finaleOn = null, bookOn = null, lastKm = -1;
+const DOM_DUR = () => (REDUCED || DEBUG) ? 0 : 1;
+function setCard(i){
+  if(i === activeCard) return;
+  const prev = activeCard; activeCard = i;
+  const k = DOM_DUR();
+  if(prev >= 0) gsap.to(CARDS[prev], { autoAlpha:0, y:-16, rotation:0.6, duration:0.32*k, ease:'power2.in', overwrite:true });
+  if(i >= 0) gsap.fromTo(CARDS[i], { autoAlpha:0, y:28, rotation:-2.6 },
+    { autoAlpha:1, y:0, rotation:(i % 2 ? 0.7 : -1.1), duration:0.75*k, delay:0.1*k, ease:'power3.out', overwrite:true });
+}
+function setShown(el, on, was, yIn){
+  if(on === was) return on;
+  const k = DOM_DUR();
+  if(on) gsap.fromTo(el, { autoAlpha:0, y:yIn }, { autoAlpha:1, y:0, duration:0.9*k, ease:'power3.out', overwrite:true });
+  else gsap.to(el, { autoAlpha:0, y:-yIn*0.5, duration:0.35*k, ease:'power2.in', overwrite:true });
+  return on;
+}
+function applyDom(p, R, S){
+  if(!HERO_ON){
+    const ho = 1 - seg(p, 0.004, 0.032);
+    heroCopy.style.opacity = ho.toFixed(3);
+    heroCopy.style.visibility = ho > 0.01 ? 'visible' : 'hidden';
+  }
+  const so = seg(p, 0.07, 0.095)*(1 - seg(p, 0.925, 0.945));
+  strip.style.opacity = so.toFixed(3);
+  strip.style.visibility = so > 0.01 ? 'visible' : 'hidden';
+  setCard((p > 0.076 && p < 0.828) ? Math.max(0, Math.min(NP-1, Math.round(R) - 1)) : -1);
+  finaleOn = setShown(finaleLine, p > 0.85 && p < 0.942, finaleOn, 18);
+  bookOn = setShown(bookPanel, p > 0.984, bookOn, 22);
+
+  // the strip: where the hiker is, in km and metres
+  let i = 0; while(i < NP-1 && S > ROUTE.cross[i+1]) i++;
+  const f = clamp01((S - ROUTE.cross[i])/Math.max(1e-6, ROUTE.cross[i+1] - ROUTE.cross[i]));
+  const km = KM0[i] + f*DAYS[i].km;
+  if(Math.abs(km - lastKm) > 0.02 && mkEl){
+    lastKm = km;
+    const x = svg._X(km), y = svg._Y(altAt(km));
+    mkEl.setAttribute('transform', 'translate(' + x.toFixed(1) + ' 0)');
+    mkEl.querySelector('circle').setAttribute('cy', y.toFixed(1));
+    doneRect.setAttribute('width', x.toFixed(1));
+    roAlt.textContent = fmtAlt(altAt(km));
+    roKm.textContent = 'km ' + km.toFixed(1) + ' of 58';
+  }
+}
+
+/* ============================================================
+   9. the loop. one ticker drives Lenis, the springs and the render.
+   ============================================================ */
+const P = { t: DEBUG ? (PQ || 0) : 0, s: DEBUG ? (PQ || 0) : 0 };
+const tiltT = { x:0, y:0 }, tiltS = { x:0, y:0, vx:0, vy:0 };
+const _y = new THREE.Vector3(0,1,0), _o = new THREE.Vector3();
+let lastFov = 0;
+
+function update(dt, t, settle){
+  const p = P.s, R = railAt(p);
+  applyFold(mapOpenAt(p));
+  if(FOLD.uc < 0.001) coverPivot.rotation.z = PEEK.v*0.16;
+
+  // camera on the rail, then the tiny hand tilt
+  cameraAt(R);
+  camera.position.copy(CAMS.pos);
+  if(INTRO.v < 1){
+    const k = 1 - INTRO.v;
+    camera.position.x += -1.2*k; camera.position.y += 5.0*k; camera.position.z += -2.0*k;
+  }
+  if(!REDUCED){
+    tiltS.vx += (tiltT.x - tiltS.x)*40*dt - tiltS.vx*11*dt; tiltS.x += tiltS.vx*dt;
+    tiltS.vy += (tiltT.y - tiltS.y)*40*dt - tiltS.vy*11*dt; tiltS.y += tiltS.vy*dt;
+    _o.copy(camera.position).sub(CAMS.tgt).applyAxisAngle(_y, -tiltS.x*KNOB.TILT);
+    _o.y += tiltS.y*_o.length()*KNOB.TILT*0.5;
+    camera.position.copy(CAMS.tgt).add(_o);
+  }
+  camera.lookAt(CAMS.tgt);
+  if(Math.abs(CAMS.fov - lastFov) > 1e-3){ camera.fov = CAMS.fov; camera.updateProjectionMatrix(); lastFov = CAMS.fov; }
+
+  // scenes: each sheet chases its scene's fold through its own spring
+  for(let i=0;i<NP;i++){
+    const sc = SCENES[i];
+    sc.F = sceneF(i, p, R);
+    sc.group.visible = PANEL[i].landed;
+    for(const L of sc.sheets){
+      const target = sheetTarget(L);
+      if(settle || !sc.group.visible){ L.sp.p = target; L.sp.v = 0; }
+      else {
+        L.sp.v += (target - L.sp.p)*L.k*dt - L.sp.v*L.c*dt;
+        L.sp.p += L.sp.v*dt;
+        // the page is a floor: land and give a small bounce
+        if(L.sp.p < -HALF_PI){ L.sp.p = -HALF_PI; if(L.sp.v < 0) L.sp.v *= -0.2; }
+      }
+    }
+    keepSheetsApart(sc);
+    for(const L of sc.sheets){
+      L.group.rotation.x = L.sp.p;
+      const f = foldPose(L);
+      let rz = REDUCED ? 0 : Math.sin(t*(0.26 + L.phase*0.045) + L.phase)*L.sway*(1 - f);
+      if(L.wob.a > 0.0015) rz += Math.sin((t - L.wobStart)*L.wobFreq)*L.wobAmp*L.wob.a;
+      L.group.rotation.z = rz;
+      if(L.drift && !REDUCED) L.mesh.position.x = Math.sin(t*0.21 + L.phase*1.7)*L.drift*(1 - f);
+    }
+  }
+  if(IN) IN.frame(dt, t, p, R, settle);
+
+  // route and hiker
+  const S = routeAt(p);
+  routeU.uDraw.value = S;
+  mapRoot.updateMatrixWorld(true);
+  const pt = ROUTE.at(S);
+  const hi = Math.max(0, Math.min(NP-1, Math.floor(pt.x/PW)));
+  const H = HIKER;
+  H.group.position.copy(FRAME[hi].localToWorld(_o.set(pt.x - hi*PW, 0.006 + (IN && IN.groundY ? IN.groundY(pt.x, pt.z) : 0), pt.z)));
+  const moved = Math.abs(S - H.lastS); H.lastS = S;
+  const walk = REDUCED ? 0 : Math.min(1, moved/Math.max(dt, 1e-3)*0.9);
+  H.walk = lerp(H.walk || 0, walk, 1 - Math.exp(-dt*8));
+  H.phase += moved*7.5 + (REDUCED ? 0 : dt*0.4);
+  H.group.position.y += Math.abs(Math.sin(H.phase*PI))*0.055*H.walk;
+  let hz = Math.sin(H.phase*PI)*0.07*H.walk;
+  if(H.wob.a > 0.0015) hz += Math.sin((t - H.wobStart)*H.wobFreq)*H.wobAmp*H.wob.a;
+  H.group.rotation.set(0, -0.14, hz);
+  H.group.visible = p > 0.084 && p < 0.952 && PANEL[hi].landed;
+  // a shut map hides its ink. from the side the gaps in the stack would show it
+  for(let i=0;i<NP;i++) ROUTE_MESH[i].visible = FOLD.M > 0.02;
+
+  applyLight(R);
+  applyDom(p, R, S);
+}
+
+function frameLoop(time){
+  const dt = frameLoop.last === undefined ? 0.016 : Math.min(0.034, Math.max(0.001, time - frameLoop.last));
+  frameLoop.last = time;
+  if(QUEUE.length) pump(2);
+  if(document.hidden) return;
+  if(REDUCED) P.s = P.t;
+  else { P.s += (P.t - P.s)*(1 - Math.exp(-dt*KNOB.SCROLL_EASE)); if(Math.abs(P.t - P.s) < 1e-5) P.s = P.t; }
+  if(HK){ HXS.s = REDUCED ? HXS.t : HXS.s + (HXS.t - HXS.s)*(1 - Math.exp(-dt*KNOB.SCROLL_EASE)); if(Math.abs(HXS.t - HXS.s) < 1e-5) HXS.s = HXS.t; }
+  // a hero that lands inside the map (V3's dive) sets V1's timeline itself while it owns the screen
+  if(HK && HK.pOf && HXS.s < 1){ P.s = HK.pOf(HXS.s); }
+  update(dt, time, REDUCED);
+  if(HK) HK.frame(dt, time, HXS.s);
+  renderer.render(scene, camera);
+  if(HK && HK.after) HK.after();
+  if(HUD) hud();
+  if(Q.has('log') && (frameLoop.n = (frameLoop.n||0) + 1) === 30){
+    const inf = renderer.info.render;
+    console.log('LOG calls ' + inf.calls + ' tris ' + inf.triangles + ' cam ' + camera.position.toArray().map(v=>v.toFixed(2)).join(',') + ' tgt ' + CAMS.tgt.toArray().map(v=>v.toFixed(2)).join(',') + ' prog ' + renderer.info.programs.length);
+  }
+}
+
+/* ---- sizing ---- */
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap()));
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();   // V1 only did this when the fov changed, so a resize stretched the frame
+  computePoses();
+  buildProfile(); lastKm = -1;
+  dirty = true;
+  // setSize clears the canvas, so paint straight away rather than wait a tick
+  if(HK) HK.resize();
+  placeHandoff();
+  if(BOOTED){ update(0, frameLoop.last || 0, REDUCED); if(HK) HK.frame(0, frameLoop.last || 0, HXS.s); renderer.render(scene, camera); }
+}
+let BOOTED = false;
+
+/* ---- V2 hero option: everything the hero files may touch, in one object ---- */
+const heroExitEl = document.querySelector('.hero-exit');
+function heroPx(){ return HK ? heroExitEl.offsetHeight : 0; }
+function placeHandoff(){
+  const el = document.getElementById('handoff'); if(!el) return;
+  const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  el.style.top = Math.round(HK && HK.pLand ? heroPx() : heroPx() + 0.031*Math.max(1, max - heroPx())) + 'px';
+}
+let HK = null;
+const HXS = { t:0, s:0 };
+if(HERO_ON){
+  const API = {
+    THREE, gsap, scene, camera, renderer, canvas, Q, HERO, REDUCED, DEBUG,
+    KNOB, COL, PW, PD, NP, E, COVER_H, HALF_PI, PI,
+    mk, shapeCanvas, colourCanvas, tex, makePaper, rng, clamp01, seg, smooth, ease3, lerp, tracked, hexA, MONO,
+    mapRoot, coverPivot, COVER, FRAME, PANEL, table, tableTex, key, hemi, fill, LIGHT, CAMS, POSES, HIKER, ROUTE, routeAt, SCENES,
+    get NARROW(){ return NARROW; }, get lenis(){ return lenis; }, get P(){ return P; }, get FOLD(){ return FOLD; },
+    // the camera V1 would use right now (the shut map, with the hand tilt). blend to it as the hero exits
+    homeCam(){ return { pos:camera.position.clone(), tgt:CAMS.tgt.clone(), fov:CAMS.fov }; },
+    setFov(f){ if(Math.abs(camera.fov - f) > 1e-3){ camera.fov = f; camera.updateProjectionMatrix(); } },
+    heroPx, startTour, setDirty(){ dirty = true; }
+  };
+  HK = window.HERO_KIT.create(API, window.HERO_OPTIONS[HERO]);
+}
+// the interior builds after the hero kit, which has already set the dark room's daylight
+if(IN) IN.build({ THREE, gsap, scene, camera, renderer, SCENES, FRAME, PANEL, ROUTE, ROUTE_MAT, ROUTE_MESH, routeMaterial, routeU, routeAt, HIKER, LIGHT, key, hemi, fill, CAMS, HXS, HK,
+  makePaper, shapeCanvas, colourCanvas, tex, buildSheet, QUEUE, REDUCED, P, get NARROW(){ return NARROW; } });
+
+resize();
+window.addEventListener('resize', resize);
+
+/* ---- pointer: tilt, and tap a cut-out to wobble it (pixel accurate) ---- */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+let downX = 0, downY = 0;
+function setPtr(e){ ptr.x = (e.clientX/window.innerWidth)*2 - 1; ptr.y = -(e.clientY/window.innerHeight)*2 + 1; }
+function pickable(){
+  const out = [];
+  SCENES.forEach(sc=>{ if(sc.group.visible) sc.sheets.forEach(L=>{ if(L.sp.p > -1.2) out.push(L.mesh); }); });
+  if(HIKER.group.visible) out.push(HIKER.mesh);
+  return out;
+}
+function wobble(L, now){
+  if(REDUCED) return;
+  gsap.killTweensOf(L.wob);
+  L.wob.a = 1; L.wobStart = now;
+  gsap.to(L.wob, { a:0, duration:1.75, ease:'power2.out' });
+}
+window.addEventListener('pointermove', (e)=>{
+  tiltT.x = (e.clientX/window.innerWidth)*2 - 1;
+  tiltT.y = (e.clientY/window.innerHeight)*2 - 1;
+}, { passive:true });
+window.addEventListener('pointerdown', (e)=>{ downX = e.clientX; downY = e.clientY; }, { passive:true });
+window.addEventListener('pointerup', (e)=>{
+  if(Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) return;
+  if(e.target !== canvas) return;
+  setPtr(e); ray.setFromCamera(ptr, camera);
+  const hits = ray.intersectObjects(pickable(), false);
+  for(let i=0;i<hits.length;i++){
+    const L = hits[i].object.userData.layer;
+    if(!L || !hits[i].uv) continue;
+    const px = Math.max(0, Math.min(L.cw-1, Math.floor(hits[i].uv.x*L.cw)));
+    const py = Math.max(0, Math.min(L.ch-1, Math.floor((1 - hits[i].uv.y)*L.ch)));
+    let a = 255;
+    try{ a = L.probe.getImageData(px, py, 1, 1).data[1]; }catch(err){}
+    if(a > 128){ wobble(L, gsap.ticker.time); break; }
+  }
+});
+
+/* ---- scroll: Lenis and ScrollTrigger on one position, one ticker ---- */
+gsap.registerPlugin(ScrollTrigger);
+const lenis = new Lenis({ duration:KNOB.LENIS, easing:t => Math.min(1, 1.001 - Math.pow(2, -10*t)), smoothWheel:true });
+lenis.on('scroll', ScrollTrigger.update);
+const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+// ?still keeps the window at the top and only pins the state. headless Chrome
+// cannot screenshot a scrolled page, and every visual here is driven by p anyway.
+const STILL = DEBUG && Q.has('still');
+// with a hero option, the hero's exit gets the first stretch of scroll and the V1
+// timeline runs on what is left, so p means the same thing with or without it
+const yForP = (p) => heroPx() + p*Math.max(1, maxScroll() - heroPx());
+if(DEBUG && !STILL){
+  const y = HXQ !== null && !PQ ? HXQ*heroPx() : yForP(PQ || 0);
+  window.scrollTo(0, y);
+  lenis.scrollTo(y, { immediate:true, force:true });
+}
+ScrollTrigger.create({ start:0, end:'max', onUpdate:(self)=>{
+  if(STILL) return;
+  if(!HK){ P.t = self.progress; return; }
+  const y = self.scroll(), hp = heroPx();
+  HXS.t = hp > 0 ? clamp01(y/hp) : 1;
+  // after a dive the page starts where the hero landed, not on the shut map
+  const PL = HK.pLand || 0;
+  P.t = PL + (1 - PL)*clamp01((y - hp)/Math.max(1, maxScroll() - hp));
+} });
+if(DEBUG) P.t = PQ || 0;
+if(DEBUG && HK){ HXS.t = HXS.s = HXQ !== null ? HXQ : (PQ ? 1 : 0); }
+placeHandoff();
+if(Q.has('log')) setTimeout(()=>console.log('LOG scroll ' + Math.round(window.scrollY) + ' / ' + maxScroll() + ' lenis ' + Math.round(lenis.scroll) + ' P.t ' + P.t.toFixed(3) + ' sheets ' + SCENES.map(s=>s.sheets.length).join(',')), 300);
+
+document.getElementById('bookTop').addEventListener('click', (e)=>{ e.preventDefault(); lenis.scrollTo(maxScroll(), { duration:REDUCED ? 0 : 2.6 }); });
+document.getElementById('brand').addEventListener('click', (e)=>{ e.preventDefault(); lenis.scrollTo(0, { duration:REDUCED ? 0 : 2.2 }); });
+document.getElementById('bookCta').addEventListener('click', (e)=>{ e.preventDefault(); });
+
+/* ---- debug readout: ?hud shows progress and where the active panel lands ---- */
+const HUD = Q.has('hud') ? document.createElement('pre') : null;
+if(HUD){
+  HUD.style.cssText = 'position:fixed;right:8px;top:70px;z-index:20;margin:0;padding:8px 10px;background:rgba(255,255,255,0.85);font:11px/1.35 monospace;color:#123;pointer-events:none';
+  document.body.appendChild(HUD);
+}
+function hud(){
+  const R = railAt(P.s), i = Math.max(0, Math.min(NP-1, Math.round(R)-1)), v = new THREE.Vector3();
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  [[0.3,0,4.65],[PW-0.3,0,4.65],[0.3,3.0,-1.3],[PW-0.3,3.0,-1.3],[PW*0.5,3.4,-1.3]].forEach(q=>{
+    v.set(i*PW + q[0], q[1], q[2]).project(camera); x0=Math.min(x0,v.x); x1=Math.max(x1,v.x); y0=Math.min(y0,v.y); y1=Math.max(y1,v.y);
+  });
+  HUD.textContent = 'p ' + P.s.toFixed(3) + '  R ' + R.toFixed(2) + '  M ' + FOLD.M.toFixed(2) +
+    '\npanel ' + (i+1) + ' ndc x ' + x0.toFixed(2) + '..' + x1.toFixed(2) + '  y ' + y0.toFixed(2) + '..' + y1.toFixed(2) +
+    '\ndusk ' + DUSK.toFixed(2) + ' gold ' + GOLD.toFixed(2) + ' queue ' + QUEUE.length + '  F ' + SCENES.map(s=>s.F.toFixed(2)).join(' ');
+}
+
+/* ---- &tour: a scripted pointer for recordings. it sends real pointer events, so the
+   page reacts exactly as it would to a mouse, and draws a cursor so you can see it ---- */
+function startTour(keys){
+  if(!keys || !keys.length) return;
+  const el = document.createElement('div'); el.className = 'tour-cursor';
+  el.innerHTML = '<svg viewBox="0 0 22 22" width="22" height="22"><path d="M3 2 L3 18 L7.4 13.9 L10.3 20.4 L13.1 19.2 L10.3 12.8 L16.4 12.6 Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+  document.body.appendChild(el);
+  const at = (k) => { const v = typeof k.at === 'function' ? k.at() : k.at; return { x:v[0], y:v[1] }; };
+  const t0 = gsap.ticker.time; let k = 0, lx = -1, ly = -1;
+  const fire = (type, x, y) => {
+    const target = document.elementFromPoint(x, y) || canvas;
+    target.dispatchEvent(new PointerEvent(type, { clientX:x, clientY:y, bubbles:true, cancelable:true, pointerType:'mouse', isPrimary:true, pointerId:1, button: type === 'pointermove' ? -1 : 0, buttons: type === 'pointerdown' ? 1 : 0 }));
+    if(type === 'pointerup') target.dispatchEvent(new MouseEvent('click', { clientX:x, clientY:y, bubbles:true, cancelable:true }));
+  };
+  gsap.ticker.add(function tourTick(){
+    const t = gsap.ticker.time - t0;
+    while(k < keys.length - 1 && t >= keys[k+1].t){
+      k++;
+      if(keys[k].click){ const q = at(keys[k]); fire('pointerdown', q.x, q.y); el.classList.add('down'); setTimeout(() => { fire('pointerup', q.x, q.y); el.classList.remove('down'); }, 140); }
+    }
+    const A = keys[k], B = keys[Math.min(keys.length - 1, k + 1)];
+    const f = B === A ? 1 : smooth(clamp01((t - A.t)/Math.max(1e-3, B.t - A.t)));
+    const a = at(A), b = at(B), x = lerp(a.x, b.x, f), y = lerp(a.y, b.y, f);
+    el.style.left = x.toFixed(1) + 'px'; el.style.top = y.toFixed(1) + 'px';
+    if(Math.abs(x - lx) > 0.3 || Math.abs(y - ly) > 0.3){ lx = x; ly = y; fire('pointermove', x, y); }
+  });
+}
+// the cursor path for the page without a hero option: a slow look around the shut map
+const TOUR_V1 = () => { const W = window.innerWidth, H = window.innerHeight; return [
+  { t:0, at:[W*0.80, H*0.86] }, { t:1.6, at:[W*0.80, H*0.86] }, { t:3.4, at:[W*0.66, H*0.40] },
+  { t:5.2, at:[W*0.84, H*0.62] }, { t:6.8, at:[W*0.60, H*0.70] }, { t:8.0, at:[W*0.72, H*0.55] } ]; };
+
+/* ---- boot: settle, compile, then either the intro or the debug state ---- */
+function settleAll(){ update(0.016, 0, true); }
+if(DEBUG) pump(999, true);
+if(PLAY_INTRO){
+  // hidden before the first frame, so nothing flashes in its final place
+  gsap.set('.hero h1 .ln > span', { yPercent:112 });
+  gsap.set('.hero-copy .fx', { autoAlpha:0, y:14 });
+  gsap.set('.top', { autoAlpha:0, y:-8 });
+}
+settleAll();
+// the hero poses its own first frame, so the boot render below is already the hero's
+if(HK) HK.boot();
+renderer.compile(scene, camera);
+// first frame now, not on the first tick: the page paints the map straight away
+renderer.render(scene, camera);
+BOOTED = true;
+
+if(PLAY_INTRO){
+  gsap.timeline({ delay:0.1 })
+    .to(INTRO, { v:1, duration:2.2, ease:'power3.out' }, 0)
+    .to('.top', { autoAlpha:1, y:0, duration:0.8, ease:'power3.out' }, 0.3)
+    .to('.hero h1 .ln > span', { yPercent:0, duration:1.1, stagger:0.13, ease:'power3.out' }, 0.25)
+    .to('.hero-copy .fx', { autoAlpha:1, y:0, duration:0.8, stagger:0.1, ease:'power3.out' }, 0.6)
+    // the cover lifts a finger's width and drops back: it opens, go on
+    .to(PEEK, { v:1, duration:0.45, ease:'power2.out' }, 1.6)
+    .to(PEEK, { v:0, duration:1.1, ease:'elastic.out(1, 0.35)' }, 2.05);
+}
+
+gsap.ticker.add((time)=>{ lenis.raf(time*1000); frameLoop(time); });
+gsap.ticker.lagSmoothing(0);
+if(HK) HK.intro();
+else { window.HERO_READY = true; if(Q.has('tour')) startTour(TOUR_V1()); }
+
+// scroll position for a V1 progress p after a hero that lands inside the map (recording plans)
+const yOfP = (p) => { const hp = heroPx(), PL = (HK && HK.pLand) || 0; return hp + clamp01((p - PL)/(1 - PL))*Math.max(1, maxScroll() - hp); };
+window.APP = { P, HXS, get HK(){ return HK; }, heroPx, yForP, yOfP, IN, KNOB, SCENES, PANEL, FOLD, POSES, CAMS, ROUTE, HIKER, SPEC, QUEUE, renderer, scene, camera, lenis,
+  railAt, routeAt, mapOpenAt, sceneF, settleAll, computePoses, key, hemi, fill, get dusk(){ return DUSK; } };
+})();
+</script>
+</body>
+</html>
